@@ -1,0 +1,7 @@
+interface:
+  display_name: "docs-hub"
+  short_description: "查询 DocsHub，支持初始化与刷新"
+  default_prompt: "Use $docs-hub with init, refresh, reinit, or a plain query to work against a local DocsHub before answering from matched files."
+
+policy:
+  allow_implicit_invocation: true

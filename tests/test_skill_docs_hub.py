@@ -3,18 +3,79 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import sqlite3
 import subprocess
+import sys
 import tempfile
 import textwrap
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SKILL_ROOT = REPO_ROOT / "skills" / "docs-hub"
+CLAUDE_SKILL_ROOT = REPO_ROOT / ".claude" / "skills" / "docs-hub"
+CODEX_SKILL_ROOT = REPO_ROOT / ".codex" / "skills" / "docs-hub"
+GEMINI_SKILL_ROOT = REPO_ROOT / ".gemini" / "skills" / "docs-hub"
+MIRROR_SKILL_ROOTS = [CLAUDE_SKILL_ROOT, CODEX_SKILL_ROOT, GEMINI_SKILL_ROOT]
+MANAGED_SKILL_ENTRIES = ["SKILL.md", "agents", "references", "requirements-build.txt", "scripts"]
 BUILD_SCRIPT = SKILL_ROOT / "scripts" / "build_docset_index.py"
 SEARCH_SCRIPT = SKILL_ROOT / "scripts" / "search_docs.py"
 INIT_SCRIPT = SKILL_ROOT / "scripts" / "local_doc_init.py"
+
+sys.path.insert(0, str(SKILL_ROOT / "scripts"))
+from _common import DependencyMissingError, parse_front_matter  # noqa: E402
+from build_docset_index import compute_build_signature, merge_config  # noqa: E402
+
+
+class DocsHubCommonTest(unittest.TestCase):
+    def test_parse_front_matter_preserves_bool_scalar(self) -> None:
+        fm, body = parse_front_matter(
+            textwrap.dedent(
+                """
+                ---
+                title: bool test
+                draft: true
+                ---
+
+                content
+                """
+            ).lstrip()
+        )
+        self.assertIs(True, fm["draft"])
+        self.assertEqual("\ncontent\n", body)
+
+    def test_parse_front_matter_missing_pyyaml_fails_fast(self) -> None:
+        real_import = __import__
+
+        def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+            if name == "yaml":
+                raise ImportError("yaml missing for test")
+            return real_import(name, globals, locals, fromlist, level)
+
+        with mock.patch("builtins.__import__", side_effect=fake_import):
+            with self.assertRaises(DependencyMissingError):
+                parse_front_matter("---\ntitle: missing yaml\n---\ncontent\n")
+
+
+class DocsHubLayoutTest(unittest.TestCase):
+    def test_agent_native_skill_mirrors_match_primary_bundle(self) -> None:
+        def collect_files(root: Path) -> dict[str, str]:
+            result: dict[str, str] = {}
+            for entry in MANAGED_SKILL_ENTRIES:
+                src = root / entry
+                if src.is_dir():
+                    for path in sorted(p for p in src.rglob("*") if p.is_file() and "__pycache__" not in p.parts and not p.name.endswith(".pyc")):
+                        result[path.relative_to(root).as_posix()] = path.read_text(encoding="utf-8")
+                else:
+                    result[src.relative_to(root).as_posix()] = src.read_text(encoding="utf-8")
+            return result
+
+        primary = collect_files(SKILL_ROOT)
+        for mirror_root in MIRROR_SKILL_ROOTS:
+            self.assertTrue(mirror_root.exists(), str(mirror_root))
+            self.assertEqual(primary, collect_files(mirror_root), str(mirror_root))
 
 
 class DocsHubSearchSkillTest(unittest.TestCase):
@@ -129,6 +190,15 @@ class DocsHubSearchSkillTest(unittest.TestCase):
             text=True,
         )
         return json.loads(proc.stdout)
+
+    def read_build_signature(self, hub_root: Path, docset_id: str = "testset") -> str | None:
+        db_path = hub_root / "index" / f"{docset_id}.sqlite"
+        conn = sqlite3.connect(db_path)
+        try:
+            row = conn.execute("SELECT value FROM meta WHERE key='build_signature'").fetchone()
+            return row[0] if row else None
+        finally:
+            conn.close()
 
     def test_explicit_query_hub_root_overrides_saved_init_hub_root(self) -> None:
         hub_root = self.make_hub()
@@ -267,6 +337,362 @@ class DocsHubSearchSkillTest(unittest.TestCase):
         self.assertEqual(["sub/code-fence.md"], [row["rel_path"] for row in rows])
         self.assertEqual("Real Heading", rows[0]["heading_path"])
 
+    def test_tilde_fence_fake_heading_is_ignored(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/tilde-fence.md",
+            """
+            ---
+            title: "Tilde Fence"
+            source_url: "https://example.com/tilde-fence"
+            menu_path:
+              - "指南"
+            ---
+
+            # Real Tilde Heading
+
+            ~~~md
+            # fake tilde heading
+            tildesentinel
+            ~~~
+
+            ## Tilde Later
+
+            tilde-later-sentinel
+            """,
+        )
+        self.run_build(hub_root)
+        rows = self.run_search(hub_root, "tildesentinel", "--docset", "testset")
+        self.assertEqual(["sub/tilde-fence.md"], [row["rel_path"] for row in rows])
+        self.assertEqual("Real Tilde Heading", rows[0]["heading_path"])
+
+    def test_mtime_unchanged_second_build_skips_all(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/a.md",
+            """
+            ---
+            title: "alpha"
+            source_url: "https://example.com/a"
+            menu_path:
+              - "指南"
+            ---
+
+            # alpha
+
+            mtimeskipsentinel
+            """,
+        )
+        first = self.run_build(hub_root)
+        self.assertIn("'indexed': 1", first.stdout)
+        # 文件未动，二次 build 应当全部走 mtime 跳过路径
+        second = self.run_build(hub_root)
+        self.assertIn("'indexed': 0", second.stdout)
+        self.assertIn("'skipped_unchanged': 1", second.stdout)
+
+    def test_content_change_with_preserved_mtime_still_reindexes(self) -> None:
+        """模拟 cp -p / rsync -t：mtime 被保留但内容变了，必须重建。"""
+        hub_root = self.make_hub()
+        doc_path = self.write_doc(
+            hub_root,
+            "sub/preserved.md",
+            """
+            ---
+            title: "preserved mtime"
+            source_url: "https://example.com/preserved"
+            menu_path:
+              - "指南"
+            ---
+
+            # preserved mtime
+
+            originalpreservedsentinel
+            """,
+        )
+        self.run_build(hub_root)
+        original_stat = doc_path.stat()
+        # 改内容后显式把 mtime 写回原值
+        doc_path.write_text(
+            textwrap.dedent(
+                """
+                ---
+                title: "preserved mtime"
+                source_url: "https://example.com/preserved"
+                menu_path:
+                  - "指南"
+                ---
+
+                # preserved mtime
+
+                updatedpreservedsentinel
+                """
+            ).lstrip(),
+            encoding="utf-8",
+        )
+        os.utime(doc_path, (original_stat.st_atime, original_stat.st_mtime))
+
+        rows = self.run_search(hub_root, "--rebuild-stale", "updatedpreservedsentinel", "--docset", "testset")
+        self.assertEqual(["sub/preserved.md"], [row["rel_path"] for row in rows])
+
+    def test_setext_headings_are_recognized(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/setext.md",
+            """
+            ---
+            title: "Setext Doc"
+            source_url: "https://example.com/setext"
+            menu_path:
+              - "指南"
+            ---
+
+            功能介绍
+            ========
+
+            setextintrosentinel
+
+            常见问题
+            --------
+
+            setextfaqsentinel
+            """,
+        )
+        self.run_build(hub_root)
+        intro_rows = self.run_search(hub_root, "setextintrosentinel", "--docset", "testset")
+        faq_rows = self.run_search(hub_root, "setextfaqsentinel", "--docset", "testset")
+        self.assertEqual(["sub/setext.md"], [row["rel_path"] for row in intro_rows])
+        self.assertEqual("功能介绍", intro_rows[0]["heading_path"])
+        self.assertEqual("功能介绍 > 常见问题", faq_rows[0]["heading_path"])
+
+    def test_refresh_with_missing_docset_root_skips_that_docset(self) -> None:
+        """refresh 模式遇到 docset root 缺失时应跳过该 docset，其他 docset 照常返回结果。"""
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "ok.md",
+            """
+            ---
+            title: "ok doc"
+            source_url: "https://example.com/ok"
+            menu_path:
+              - "指南"
+            ---
+
+            # ok doc
+
+            refreshmissingrootok
+            """,
+        )
+        cfg = json.loads((hub_root / "docsets.json").read_text(encoding="utf-8"))
+        cfg["docsets"].append({"id": "broken", "name": "Broken", "root": "docs/does-not-exist"})
+        (hub_root / "docsets.json").write_text(json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        rows = self.run_search(hub_root, "--rebuild-stale", "refreshmissingrootok")
+        self.assertEqual(["ok.md"], [row["rel_path"] for row in rows])
+
+    def test_section_filter_only_returns_matching_section(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/faq.md",
+            """
+            ---
+            title: "faq doc"
+            source_url: "https://example.com/faq"
+            menu_path:
+              - "FAQ"
+            ---
+
+            # faq doc
+
+            sharedsectiontoken
+            """,
+        )
+        self.write_doc(
+            hub_root,
+            "sub/guide.md",
+            """
+            ---
+            title: "guide doc"
+            source_url: "https://example.com/guide"
+            menu_path:
+              - "指南"
+            ---
+
+            # guide doc
+
+            sharedsectiontoken
+            """,
+        )
+        self.run_build(hub_root)
+        rows = self.run_search(hub_root, "sharedsectiontoken", "--section", "FAQ", "--docset", "testset")
+        self.assertEqual(["sub/faq.md"], [row["rel_path"] for row in rows])
+
+    def test_include_nav_switches_navigation_page_visibility(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/nav.md",
+            """
+            ---
+            title: "nav doc"
+            source_url: "https://example.com/nav"
+            ---
+
+            navonlysentinel
+            """,
+        )
+        self.run_build(hub_root)
+
+        hidden_rows = self.run_search(hub_root, "navonlysentinel", "--docset", "testset")
+        visible_rows = self.run_search(hub_root, "navonlysentinel", "--docset", "testset", "--include-nav")
+
+        self.assertEqual([], hidden_rows)
+        self.assertEqual(["sub/nav.md"], [row["rel_path"] for row in visible_rows])
+        self.assertTrue(visible_rows[0]["is_nav"])
+
+    def test_title_fallback_prefers_h1_then_filename_stem(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/h1-title.md",
+            """
+            ---
+            source_url: "https://example.com/h1-title"
+            menu_path:
+              - "指南"
+            ---
+
+            # Heading Derived Title
+
+            h1titlesentinel
+            """,
+        )
+        self.write_doc(
+            hub_root,
+            "sub/stem-only.md",
+            """
+            ---
+            source_url: "https://example.com/stem-only"
+            menu_path:
+              - "指南"
+            ---
+
+            plain body without heading
+            stemonlysentinel
+            """,
+        )
+        self.run_build(hub_root)
+
+        h1_rows = self.run_search(hub_root, "h1titlesentinel", "--docset", "testset")
+        stem_rows = self.run_search(hub_root, "stemonlysentinel", "--docset", "testset")
+
+        self.assertEqual("Heading Derived Title", h1_rows[0]["title"])
+        self.assertEqual("stem-only", stem_rows[0]["title"])
+
+    def test_match_all_with_long_and_short_tokens_requires_both(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/long-only.md",
+            """
+            ---
+            title: "long only"
+            source_url: "https://example.com/long-only"
+            menu_path:
+              - "指南"
+            ---
+
+            # long only
+
+            alphalongtoken
+            """,
+        )
+        self.write_doc(
+            hub_root,
+            "sub/both.md",
+            """
+            ---
+            title: "both tokens"
+            source_url: "https://example.com/both"
+            menu_path:
+              - "指南"
+            ---
+
+            # both tokens
+
+            alphalongtoken 光标
+            """,
+        )
+        self.run_build(hub_root)
+        rows = self.run_search(hub_root, "alphalongtoken", "光标", "--match", "all", "--docset", "testset")
+        self.assertEqual(["sub/both.md"], [row["rel_path"] for row in rows])
+
+    def test_snippet_is_centered_on_hit_and_highlighted(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/snippet.md",
+            f"""
+            ---
+            title: "snippet doc"
+            source_url: "https://example.com/snippet"
+            menu_path:
+              - "指南"
+            ---
+
+            # snippet doc
+
+            {"prefix " * 80}needlehighlighttoken{" suffix" * 20}
+            """,
+        )
+        self.run_build(hub_root)
+        rows = self.run_search(hub_root, "needlehighlighttoken", "--docset", "testset")
+        self.assertEqual(["sub/snippet.md"], [row["rel_path"] for row in rows])
+        self.assertIn("【needlehighlighttoken】", rows[0]["snippet"])
+        self.assertTrue(rows[0]["snippet"].startswith("…"), rows[0]["snippet"])
+
+    def test_build_all_rebuilds_all_docsets_and_cleans_wal_sidecars(self) -> None:
+        hub_root = self.make_hub()
+        cfg = json.loads((hub_root / "docsets.json").read_text(encoding="utf-8"))
+        cfg["docsets"].append({"id": "extraset", "name": "Extra", "root": "docs/extraset"})
+        (hub_root / "docs" / "extraset").mkdir(parents=True, exist_ok=True)
+        (hub_root / "docs" / "extraset" / "extra.md").write_text(
+            textwrap.dedent(
+                """
+                ---
+                title: "extra doc"
+                source_url: "https://example.com/extra"
+                menu_path:
+                  - "指南"
+                ---
+
+                # extra doc
+
+                extra-docset-sentinel
+                """
+            ).lstrip(),
+            encoding="utf-8",
+        )
+        (hub_root / "docsets.json").write_text(json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        subprocess.run(
+            ["python3", str(BUILD_SCRIPT), "--hub-root", str(hub_root), "--docset", "all", "--rebuild"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertTrue((hub_root / "index" / "testset.sqlite").exists())
+        self.assertTrue((hub_root / "index" / "extraset.sqlite").exists())
+        self.assertFalse((hub_root / "index" / "testset.sqlite-wal").exists())
+        self.assertFalse((hub_root / "index" / "testset.sqlite-shm").exists())
+        self.assertFalse((hub_root / "index" / "extraset.sqlite-wal").exists())
+        self.assertFalse((hub_root / "index" / "extraset.sqlite-shm").exists())
+
     def test_init_fails_without_resolvable_hub_root(self) -> None:
         tmpdir = tempfile.TemporaryDirectory()
         self.addCleanup(tmpdir.cleanup)
@@ -325,6 +751,66 @@ class DocsHubSearchSkillTest(unittest.TestCase):
             text=True,
         )
         self.assertTrue((hub_root / "index" / "testset.sqlite").exists())
+
+    def test_init_cleans_stale_site_packages_before_reinstall(self) -> None:
+        tmpdir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmpdir.cleanup)
+        isolated_skill_root = Path(tmpdir.name) / "docs-hub"
+        shutil.copytree(SKILL_ROOT, isolated_skill_root)
+        stale_file = isolated_skill_root / ".deps" / "site-packages" / "stale_only.py"
+        stale_file.parent.mkdir(parents=True, exist_ok=True)
+        stale_file.write_text("stale = True\n", encoding="utf-8")
+
+        hub_root = self.make_hub()
+        subprocess.run(
+            ["python3", str(isolated_skill_root / "scripts" / "local_doc_init.py"), "--skill-root", str(isolated_skill_root), "--hub-root", str(hub_root)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertFalse(stale_file.exists())
+
+    def test_init_rebuilds_stale_indexes(self) -> None:
+        tmpdir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmpdir.cleanup)
+        isolated_skill_root = Path(tmpdir.name) / "docs-hub"
+        shutil.copytree(SKILL_ROOT, isolated_skill_root)
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/stale-index.md",
+            """
+            ---
+            title: "stale index"
+            source_url: "https://example.com/stale-index"
+            menu_path:
+              - "指南"
+            ---
+
+            # stale index
+
+            staleindexsentinel
+            """,
+        )
+        self.run_build(hub_root)
+        old_signature = self.read_build_signature(hub_root)
+
+        cfg = json.loads((hub_root / "docsets.json").read_text(encoding="utf-8"))
+        cfg["defaults"]["chunk"]["target_chars"] = 900
+        (hub_root / "docsets.json").write_text(json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8")
+        expected_signature = compute_build_signature(merge_config(cfg["defaults"], cfg["docsets"][0]))
+
+        subprocess.run(
+            ["python3", str(isolated_skill_root / "scripts" / "local_doc_init.py"), "--skill-root", str(isolated_skill_root), "--hub-root", str(hub_root)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        new_signature = self.read_build_signature(hub_root)
+        self.assertNotEqual(old_signature, new_signature)
+        self.assertEqual(expected_signature, new_signature)
 
     def test_init_accepts_workspace_root_with_nested_docsearch(self) -> None:
         tmpdir = tempfile.TemporaryDirectory()
