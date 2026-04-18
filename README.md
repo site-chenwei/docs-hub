@@ -1,15 +1,18 @@
 # Docs Hub Search Skills Repo
 
-这个仓库现在按 Skills 仓库模式组织，核心可发布产物是：
+这个仓库现在同时承担两个角色：
 
-- [skills/docs-hub](/home/chenw/code/docs-hub/skills/docs-hub)
+- 仓库根目录是同步用的 DocsHub 内容仓，保存 `docsets.json` 和 `docs/`
+- [skills/docs-hub](/home/chenw/code/docs-hub/skills/docs-hub) 是可发布的 Codex Skill 实现
 
-它是一个可安装的 Codex Skill，用于查询外部本地 DocsHub 文档库，而不是把文档快照直接打包进 Skill 本体。
+也就是说，这个仓库既能作为你自己的 DocsHub 云同步项目使用，也能直接从 `skills/docs-hub` 子路径安装 Skill。
 
 ## 仓库结构
 
 ```text
 docs-hub/
+├── docsets.json
+├── docs/
 ├── skills/
 │   └── docs-hub/
 │       ├── SKILL.md
@@ -33,6 +36,18 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
 安装后需要重启 Codex。
 
 ## 安装后使用
+
+如果你把当前仓库本身作为 DocsHub 工作目录，可以直接在 Codex 中对这个仓库执行：
+
+```text
+$docs-hub init /path/to/this/repo
+```
+
+或者进入仓库后直接：
+
+```text
+$docs-hub init
+```
 
 不要要求用户手动记 shell 命令。安装后直接在 Codex 中显式调用：
 
@@ -67,7 +82,7 @@ $docs-hub reinit /path/to/your/docs-hub
 
 ## 外部 DocsHub 要求
 
-Skill 本身不保存文档内容，实际被搜索的是一个外部 DocsHub 根目录。最小结构：
+Skill 安装产物本身不携带文档快照；实际被搜索的是一个 DocsHub 根目录。当前仓库根目录本身就满足这个结构，其他外部 DocsHub 目录也同样适用。最小结构：
 
 ```text
 <hub-root>/
@@ -124,4 +139,4 @@ python3 -m unittest discover -s tests -p 'test_skill_*.py'
 
 不再约定中文命令别名。
 
-如果后续公开发布，这个仓库可以直接作为 GitHub 来源；安装时只取 `skills/docs-hub` 子路径即可，不会把开发测试文件一起装进 Codex skill 目录。
+这个仓库可以直接作为 GitHub 来源；安装时只取 `skills/docs-hub` 子路径即可，不会把根目录文档内容和开发测试文件一起装进 Codex skill 目录。
