@@ -1,0 +1,21 @@
+---
+title: "Weather Service Kit（天气服务）"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/weather-service-kit-guide"
+menu_path:
+  - "指南"
+  - "应用服务"
+  - "Weather Service Kit（天气服务）"
+captured_at: "2026-04-17T01:36:23.476Z"
+---
+
+# Weather Service Kit（天气服务）
+
+-   **[Weather Service Kit简介](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/weather-service-introduction)**  
+    
+-   **[开发准备](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/weather-service-preparations)**  
+    
+-   **[获取天气数据](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/weather-service-getweather)**  
+    
+-   **[Weather Service Kit 常见问题](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/weather-service-faq)**  
+    
+-   **[个人数据处理说明](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/weather-service-personal-data)**

@@ -1,0 +1,52 @@
+---
+title: "SetShapeRange"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-setshaperange"
+menu_path:
+  - "指南"
+  - "AI"
+  - "CANN Kit（CANN 服务）"
+  - "AscendC算子开发"
+  - "AscendC算子接口"
+  - "基础数据结构和接口"
+  - "ge命名空间"
+  - "TensorDesc"
+  - "SetShapeRange"
+captured_at: "2026-04-17T01:36:36.387Z"
+---
+
+# SetShapeRange
+
+#### 函数功能
+
+设置shape的变化范围。
+
+#### 函数原型
+
+```cpp
+graphStatus SetShapeRange(const std::vector<std::pair<int64_t,int64_t>> &range);
+```
+
+#### 参数说明
+
+| 参数名 | 输入/输出 | 描述 |
+| :-- | :-- | :-- |
+| range | 输入 | 
+shape代表的变化范围。vector中的每一个元素为一个pair，pair的第一个值为该维度上的dim最小值，第二个值为该维度上dim的最大值。举例如下。
+
+该tensor的shape为{1, 1, -1, 2}，第三个轴的最大值为100，则range可设置为{{1, 1}, {1, 1}, {1, 100}, {2, 2}}。
+
+ |
+
+#### 返回值
+
+| 类型 | 描述 |
+| :-- | :-- |
+| graphStatus | 函数执行结果。若成功，则该值为GRAPH\_SUCCESS(即0)，其他值则为执行失败。 |
+
+#### 异常处理
+
+无
+
+#### 约束说明
+
+无

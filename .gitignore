@@ -1,0 +1,23 @@
+# 索引产物不入库
+index/*.sqlite
+index/*.sqlite-*
+index/*.warnings.jsonl
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+.deps/
+.local-doc-init.json
+**/.skill-init.json
+skills/*/.deps/
+
+# 编辑器/系统
+.vscode/
+.idea/
+.DS_Store
+
+# Windows 文件系统残留（WSL 跨系统复制带来）
+**/*:Zone.Identifier

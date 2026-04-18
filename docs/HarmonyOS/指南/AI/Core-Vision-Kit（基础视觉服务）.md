@@ -1,0 +1,27 @@
+---
+title: "Core Vision Kit（基础视觉服务）"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/core-vision-kit-guide"
+menu_path:
+  - "指南"
+  - "AI"
+  - "Core Vision Kit（基础视觉服务）"
+captured_at: "2026-04-17T01:36:38.883Z"
+---
+
+# Core Vision Kit（基础视觉服务）
+
+-   **[Core Vision Kit简介](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/core-vision-introduction)**  
+    
+-   **[通用文字识别](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/core-vision-text-recognition)**  
+    
+-   **[人脸检测](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/core-vision-face-detector)**  
+    
+-   **[人脸比对](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/core-vision-face-comparator)**  
+    
+-   **[主体分割](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/core-vision-subject-segmentation)**  
+    
+-   **[多目标识别](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/core-vision-object-detection)**  
+    
+-   **[骨骼点检测](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/core-vision-skeleton-detection)**  
+    
+-   **[个人数据处理说明](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/corevisionkit-personal-data)**

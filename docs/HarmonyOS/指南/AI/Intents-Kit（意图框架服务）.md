@@ -1,0 +1,31 @@
+---
+title: "Intents Kit（意图框架服务）"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/intents-kit-guide"
+menu_path:
+  - "指南"
+  - "AI"
+  - "Intents Kit（意图框架服务）"
+captured_at: "2026-04-17T01:36:39.003Z"
+---
+
+# Intents Kit（意图框架服务）
+
+-   **[Intents Kit简介](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/intents-introduction)**  
+    
+-   **[Intents Kit接入流程](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/intents-access-flow)**  
+    
+-   **[习惯推荐方案](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/intents-habit-rec)**  
+    
+-   **[事件推荐方案](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/intents-event-rec)**  
+    
+-   **[位置推荐方案](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/intents-local-rec)**  
+    
+-   **[技能调用方案](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/intents-skill-all-rec)**  
+    
+-   **[本地搜索方案](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/intents-search-rec)**  
+    
+-   **[意图框架上架配置指导](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/intents-kit-listing-configuration)**  
+    
+-   **[常见问题](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/intents-frequently-asked-questions)**  
+    
+-   **[附录A：获取华为账号对应UID的方式](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/intents-appendix-a-get-uid)**

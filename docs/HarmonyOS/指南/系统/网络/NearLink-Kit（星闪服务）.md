@@ -1,0 +1,32 @@
+---
+title: "NearLink Kit（星闪服务）"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/nearlink-kit-guide"
+menu_path:
+  - "指南"
+  - "系统"
+  - "网络"
+  - "NearLink Kit（星闪服务）"
+captured_at: "2026-04-17T01:35:53.135Z"
+---
+
+# NearLink Kit（星闪服务）
+
+-   **[NearLink Kit简介](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/nearlink-introduction)**  
+    
+-   **[NearLink Kit术语](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/nearlink-terminology)**  
+    
+-   **[开发准备](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/nearlink-preparations)**  
+    
+-   **[查询是否支持星闪服务](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/nearlink-issupported)**  
+    
+-   **[查询星闪开关状态](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/nearlink-getstate)**  
+    
+-   **[发送星闪广播](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/nearlink-send-advertising)**  
+    
+-   **[发起星闪扫描](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/nearlink-start-scan)**  
+    
+-   **[SSAP连接及数据传输](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/nearlink-ssap-connect)**  
+    
+-   **[使用星闪传输数据](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/nearlink-start-data-transfer)**  
+    
+-   **[NearLink Kit常见问题](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/nearlink-faq)**

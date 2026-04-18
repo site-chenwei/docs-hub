@@ -1,0 +1,28 @@
+---
+title: "OH_AudioSessionManager"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-ohaudio-oh-audiosessionmanager"
+menu_path:
+  - "参考"
+  - "媒体"
+  - "Audio Kit（音频服务）"
+  - "C API"
+  - "结构体"
+  - "OH_AudioSessionManager"
+captured_at: "2026-04-17T01:48:36.549Z"
+---
+
+# OH\_AudioSessionManager
+
+```c
+typedef struct OH_AudioSessionManager OH_AudioSessionManager
+```
+
+#### 概述
+
+声明音频会话管理器。用于管理音频会话相关功能。
+
+**起始版本：** 12
+
+**相关模块：** [OHAudio](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-ohaudio)
+
+**所在头文件：** [native\_audio\_session\_manager.h](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-native-audio-session-manager-h)

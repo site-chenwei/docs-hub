@@ -1,0 +1,38 @@
+---
+title: "如何获取指定bundleFlags的Ability信息"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-faqs/faqs-ability-72"
+menu_path:
+  - "FAQ"
+  - "应用框架开发"
+  - "程序框架"
+  - "程序框架（Ability）"
+  - "如何获取指定bundleFlags的Ability信息"
+captured_at: "2026-04-17T02:02:59.084Z"
+---
+
+# 如何获取指定bundleFlags的Ability信息
+
+bundleManager.getBundleInfoForSelf :getBundleInfoForSelf(bundleFlags: number): Promise<BundleInfo>;
+
+根据给定的bundleFlags，异步获取当前应用的BundleInfo，返回结果使用Promise形式。参考示例代码如下：
+
+// Get appInfo with metadataArray information
+import { bundleManager } from '@kit.AbilityKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+
+let bundleFlags = bundleManager.BundleFlag.GET\_BUNDLE\_INFO\_WITH\_APPLICATION | bundleManager.BundleFlag.GET\_BUNDLE\_INFO\_WITH\_METADATA;
+try {
+  bundleManager.getBundleInfoForSelf(bundleFlags).then((data) => {
+    hilog.info(0x0000, 'testTag', 'getBundleInfoForSelf successfully. Data: %{public}s', JSON.stringify(data));
+  }).catch((err: BusinessError) => {
+    hilog.error(0x0000, 'testTag', 'getBundleInfoForSelf failed. Cause: %{public}s', err.message);
+  });
+} catch (err) {
+  let message = (err as BusinessError).message;
+  hilog.error(0x0000, 'testTag', 'getBundleInfoForSelf failed: %{public}s', message);
+}
+
+**参考链接**
+
+[bundleManager.getBundleInfoForSelf](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-bundlemanager#bundlemanagergetbundleinfoforself)

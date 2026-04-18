@@ -1,0 +1,78 @@
+---
+title: "XEG_RTReflectionCreateInfo"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/xengine-kit-xeg-rtreflectioncreateinfo"
+menu_path:
+  - "参考"
+  - "图形"
+  - "XEngine Kit（GPU加速引擎服务）"
+  - "C API"
+  - "头文件和结构体"
+  - "结构体"
+  - "XEG_RTReflectionCreateInfo"
+captured_at: "2026-04-17T01:48:55.464Z"
+---
+
+# XEG\_RTReflectionCreateInfo
+
+#### 概述
+
+此结构体描述创建[XEG\_RTReflection](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/xengine-kit-xengine#xeg_rtreflection)对象的信息。当结构体中的信息变化时，需要创建新的[XEG\_RTReflection](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/xengine-kit-xengine#xeg_rtreflection)对象。
+
+**起始版本：** 6.0.0(20)
+
+**相关模块：** [XEngine](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/xengine-kit-xengine)
+
+**所在头文件：** [xeg\_vulkan\_rt\_reflection.h](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/xengine-kit-xeg-vulkan-rt-reflection-8h)
+
+#### 汇总
+
+#### \[h2\]成员变量
+
+| 名称 | 描述 |
+| :-- | :-- |
+| XEG\_StructureType [sType](#stype) | 识别此结构的[XEG\_StructureType](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/xengine-kit-xengine#xeg_structuretype)值，必须是XEG\_STRUCTURE\_TYPE\_RT\_REFLECTION\_CREATE\_INFO。 |
+| const void \* [pNext](#pnext) | 指向扩展结构的指针。 |
+| VkExtent2D [renderSize](#rendersize) | 输入图像的尺寸。 |
+| bool [enableFastTrace](#enablefasttrace) | 是否开启快速求交模式，相较常规求交模式，快速求交模式的性能更好。true表示开启快速求交模式，false表示使用常规求交模式。 |
+
+#### 结构体成员变量说明
+
+#### \[h2\]enableFastTrace
+
+```cpp
+bool XEG_RTReflectionCreateInfo::enableFastTrace
+```
+
+**描述**
+
+是否开启快速求交模式，相较常规求交模式，快速求交模式的性能更好。true表示开启快速求交模式，false表示使用常规求交模式。
+
+#### \[h2\]pNext
+
+```cpp
+const void* XEG_RTReflectionCreateInfo::pNext
+```
+
+**描述**
+
+指向扩展结构的指针。
+
+#### \[h2\]renderSize
+
+```cpp
+VkExtent2D XEG_RTReflectionCreateInfo::renderSize
+```
+
+**描述**
+
+输入图像的尺寸。
+
+#### \[h2\]sType
+
+```cpp
+XEG_StructureType XEG_RTReflectionCreateInfo::sType
+```
+
+**描述**
+
+识别此结构的[XEG\_StructureType](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/xengine-kit-xengine#xeg_structuretype)值，必须是XEG\_STRUCTURE\_TYPE\_RT\_REFLECTION\_CREATE\_INFO。

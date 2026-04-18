@@ -1,0 +1,31 @@
+---
+title: "Cloud Foundation Kit（云开发服务）"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cloud-foundation-kit-guide"
+menu_path:
+  - "指南"
+  - "应用服务"
+  - "Cloud Foundation Kit（云开发服务）"
+captured_at: "2026-04-17T01:36:12.979Z"
+---
+
+# Cloud Foundation Kit（云开发服务）
+
+-   **[Cloud Foundation Kit简介](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cloudfoundation-introduction)**  
+    
+-   **[开发准备](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cloudfoundation-preparations)**  
+    
+-   **[云函数](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cloudfoundation-function-service)**  
+    
+-   **[云数据库](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cloudfoundation-database-service)**  
+    
+-   **[云存储](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cloudfoundation-storage-service)**  
+    
+-   **[预加载](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cloudfoundation-prefetch-service)**  
+    
+-   **[使用模拟器调试](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cloudfoundation-emulator)**  
+    
+-   **[Cloud Foundation Kit常见问题](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cloudfoundation-faq)**  
+    
+-   **[个人数据处理说明](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cloudfoundation-personal-data)**  
+    
+-   **[附录](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cloudfoundation-appendix)**

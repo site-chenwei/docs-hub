@@ -1,0 +1,128 @@
+---
+title: "tabs"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-components-container-tabs"
+menu_path:
+  - "参考"
+  - "应用框架"
+  - "ArkUI（方舟UI框架）"
+  - "JS组件"
+  - "兼容JS的类Web开发范式（ArkUI.Full）"
+  - "容器组件"
+  - "tabs"
+captured_at: "2026-04-17T01:48:00.825Z"
+---
+
+# tabs
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/1e/v3/2W4doulUROCHQyEV2ld-kg/note_3.0-zh-cn.png?HW-CC-KV=V1&HW-CC-Date=20260417T014803Z&HW-CC-Expire=86400&HW-CC-Sign=220BB779C2F7D613606C0A57ABF9637A9A800A71B347399225D37B3FF0DFCD0B)
+
+从API version 4开始支持。后续版本如有新增内容，则采用上角标单独标记该内容的起始版本。
+
+tab页签容器。
+
+#### 权限列表
+
+无
+
+#### 子组件
+
+仅支持<[tab-bar](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-components-container-tab-bar)\>和<[tab-content](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-components-container-tab-content)\>。
+
+#### 属性
+
+除支持[通用属性](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-components-common-attributes)外，还支持如下属性：
+
+| 名称 | 类型 | 默认值 | 必填 | 描述 |
+| :-- | :-- | :-- | :-- | :-- |
+| index | number | 0 | 否 | 当前处于激活态的tab索引。 |
+| vertical | boolean | false | 否 | 
+是否为纵向的tab，默认为false，可选值为：
+
+\- false：tabbar和tabcontent上下排列。
+
+\- true：tabbar和tabcontent左右排列。
+
+ |
+
+#### 样式
+
+支持[通用样式](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-components-common-styles)。
+
+#### 事件
+
+除支持[通用事件](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-components-common-events)外，还支持如下事件：
+
+| 名称 | 参数 | 描述 |
+| :-- | :-- | :-- |
+| change | { index: indexValue } | tab页签切换后触发，动态修改index值不会触发该回调。 |
+
+#### 示例
+
+```html
+<!-- xxx.hml -->
+<div class="container">
+  <tabs class = "tabs" index="0" vertical="false" onchange="change">
+    <tab-bar class="tab-bar" mode="fixed">
+      <text class="tab-text">Home</text>
+      <text class="tab-text">Index</text>
+      <text class="tab-text">Detail</text>
+    </tab-bar>
+    <tab-content class="tabcontent" scrollable="true">
+      <div class="item-content" >
+        <text class="item-title">First screen</text>
+      </div>
+      <div class="item-content" >
+        <text class="item-title">Second screen</text>
+      </div>
+      <div class="item-content" >
+        <text class="item-title">Third screen</text>
+      </div>
+    </tab-content>
+  </tabs>
+</div>
+```
+
+```css
+/* xxx.css */
+.container {
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+.tabs {
+  width: 100%;
+}
+.tabcontent {
+  width: 100%;
+  height: 80%;
+  justify-content: center;
+}
+.item-content {
+  height: 100%;
+  justify-content: center;
+}
+.item-title {
+  font-size: 60px;
+}
+.tab-bar {
+  margin: 10px;
+  height: 60px;
+  border-color: #007dff;
+  border-width: 1px;
+}
+.tab-text {
+  width: 300px;
+  text-align: center;
+}
+```
+
+```js
+// xxx.js
+export default {
+  change: function(e) {
+    console.info("Tab index: " + e.index);
+  },
+}
+```
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/ee/v3/Tehf0DtlRwK-Zn7g2ycyFQ/zh-cn_image_0000002538021138.gif?HW-CC-KV=V1&HW-CC-Date=20260417T014803Z&HW-CC-Expire=86400&HW-CC-Sign=F299FE45647EC36D11D7A8E358B7CB4DD363BF97E7550AC5DB43C9479C0ED3FC)

@@ -1,0 +1,28 @@
+---
+title: "NativeVsync"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-nativevsync"
+menu_path:
+  - "参考"
+  - "图形"
+  - "ArkGraphics 2D（方舟2D图形服务）"
+  - "C API"
+  - "模块"
+  - "NativeVsync"
+captured_at: "2026-04-17T01:48:47.213Z"
+---
+
+# NativeVsync
+
+#### 概述
+
+提供获取系统vsync回调的功能，可用于实现应用的绘制帧率与系统帧率同步。
+
+**系统能力：** SystemCapability.Graphic.Graphic2D.NativeVsync
+
+**起始版本：** 9
+
+#### 文件汇总
+
+| 名称 | 描述 |
+| :-- | :-- |
+| [native\_vsync.h](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-native-vsync-h) | 定义获取和使用NativeVsync的相关函数。 |

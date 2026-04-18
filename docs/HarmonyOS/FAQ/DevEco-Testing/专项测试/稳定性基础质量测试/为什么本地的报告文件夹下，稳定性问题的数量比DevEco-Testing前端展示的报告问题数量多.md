@@ -1,0 +1,15 @@
+---
+title: "为什么本地的报告文件夹下，稳定性问题的数量比DevEco Testing前端展示的报告问题数量多"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-faqs/faqs-stability-basic-quality-test-4"
+menu_path:
+  - "FAQ"
+  - "DevEco Testing"
+  - "专项测试"
+  - "稳定性基础质量测试"
+  - "为什么本地的报告文件夹下，稳定性问题的数量比DevEco Testing前端展示的报告问题数量多"
+captured_at: "2026-04-17T02:03:26.043Z"
+---
+
+# 为什么本地的报告文件夹下，稳定性问题的数量比DevEco Testing前端展示的报告问题数量多
+
+目前由于停止采集操作存在延迟，DevEco Testing在停止问题抓取并生成报告后，采集操作仍会运行0-10s，期间抓取的问题并不会呈现在前端上。

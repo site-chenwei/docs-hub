@@ -1,0 +1,50 @@
+---
+title: "@typescript"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide_no-unnecessary-type-assertion"
+menu_path:
+  - "指南"
+  - "编写与调试应用"
+  - "代码编辑"
+  - "代码检查"
+  - "Code Linter代码检查规则"
+  - "通用规则@typescript-eslint"
+  - "@typescript-eslint/no-unnecessary-type-assertion"
+captured_at: "2026-04-17T01:36:45.738Z"
+---
+
+# @typescript-eslint/no-unnecessary-type-assertion
+
+禁止不必要的类型断言。
+
+如果类型断言没有更改表达式的类型，也就没有必要使用。
+
+#### 规则配置
+
+// code-linter.json5
+{
+  "rules": {
+    "@typescript-eslint/no-unnecessary-type-assertion": "error"
+  }
+}
+
+#### 选项
+
+详情请参考[@typescript-eslint/no-unnecessary-type-assertion选项](https://typescript-eslint.nodejs.cn/rules/no-unnecessary-type-assertion/#options)。
+
+#### 正例
+
+const num = 3;
+export const foo2 = num as number;
+export const foo3 = 'foo' as string;
+
+#### 反例
+
+const num = 3;
+export const foo = num;
+export const bar = foo!;
+
+#### 规则集
+
+plugin:@typescript-eslint/all
+
+Code Linter代码检查规则的配置指导请参考[Code Linter代码检查](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-code-linter)。

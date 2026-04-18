@@ -1,0 +1,27 @@
+---
+title: "ArkTS模块化"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-runtime-module"
+menu_path:
+  - "指南"
+  - "应用框架"
+  - "ArkTS（方舟编程语言）"
+  - "ArkTS运行时"
+  - "ArkTS模块化"
+captured_at: "2026-04-17T01:35:35.118Z"
+---
+
+# ArkTS模块化
+
+-   **[模块化运行简介](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/module-principle)**  
+    
+-   **[动态加载](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-dynamic-import)**  
+    
+-   **[延迟加载（lazy import）](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-lazy-import)**  
+    
+-   **[同步方式动态加载Native模块](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/js-apis-load-native-module)**  
+    
+-   **[静态方式加载Native模块](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-import-native-module)**  
+    
+-   **[基于Node-API加载模块](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/load-module-base-nodeapi)**  
+    
+-   **[模块加载副作用及优化](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-module-side-effects)**

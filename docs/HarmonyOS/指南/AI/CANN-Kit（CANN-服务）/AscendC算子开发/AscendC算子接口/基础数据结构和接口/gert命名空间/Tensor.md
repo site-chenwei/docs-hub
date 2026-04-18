@@ -1,0 +1,70 @@
+---
+title: "Tensor"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-tensor"
+menu_path:
+  - "指南"
+  - "AI"
+  - "CANN Kit（CANN 服务）"
+  - "AscendC算子开发"
+  - "AscendC算子接口"
+  - "基础数据结构和接口"
+  - "gert命名空间"
+  - "Tensor"
+captured_at: "2026-04-17T01:36:30.453Z"
+---
+
+# Tensor
+
+-   **[构造函数](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-tensor-constructor)**  
+    
+-   **[GetShapeSize](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-getshapesize)**  
+    
+-   **[GetData](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-getdata)**  
+    
+-   **[SetData](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-setdata)**  
+    
+-   **[GetAddr](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-tensor-getaddr)**  
+    
+-   **[GetSize](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-ge-tensor-getsize)**  
+    
+-   **[SetSize](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-tensor-setsize)**  
+    
+-   **[GetDataType](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-getdatatype)**  
+    
+-   **[SetDataType](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-setdatatype)**  
+    
+-   **[CreateFollowing](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-createfollowing)**  
+    
+-   **[GetStorageShape](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-tensor-getstorageshape)**  
+    
+-   **[MutableStorageShape](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-tensor-mutablestorageshape)**  
+    
+-   **[GetOriginShape](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-tensor-getoriginshape)**  
+    
+-   **[MutableOriginShape](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-tensor-mutableoriginshape)**  
+    
+-   **[GetShape](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-getshape)**  
+    
+-   **[GetStorageFormat](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-tensor-getstorageformat)**  
+    
+-   **[SetStorageFormat](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-setsorageformat)**  
+    
+-   **[GetOriginFormat](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-ge-tensor-getoriginformat)**  
+    
+-   **[SetOriginFormat](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-tensor-setoriginformat)**  
+    
+-   **[GetFormat](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-getformat)**  
+    
+-   **[MutableFormat](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-mutableformat)**  
+    
+-   **[GetExpandDimsType](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-tensor-getexpanddimstype)**  
+    
+-   **[SetExpandDimsType](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-tensor-setexpanddimstype)**  
+    
+-   **[GetPlacement](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-ge-tensor-getplacement)**  
+    
+-   **[SetPlacement](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-ge-tensor-setplacement)**  
+    
+-   **[GetTensorData](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-gettensordata)**  
+    
+-   **[MutableTensorData](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/cannkit-mutabletensordata)**

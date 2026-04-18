@@ -1,0 +1,76 @@
+---
+title: "@performance/high"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-high-frequency-log-check"
+menu_path:
+  - "指南"
+  - "编写与调试应用"
+  - "代码编辑"
+  - "代码检查"
+  - "Code Linter代码检查规则"
+  - "性能规则@performance"
+  - "@performance/high-frequency-log-check"
+captured_at: "2026-04-17T01:36:47.216Z"
+---
+
+# @performance/high-frequency-log-check
+
+不建议在高频函数中使用Hilog。
+
+高频函数包括：onTouch、onItemDragMove、onDragMove、onMouse、onVisibleAreaChange、onAreaChange、onScroll（已废弃）、onWillScroll。
+
+高耗时函数处理场景下，建议优先修改。
+
+#### 规则配置
+
+// code-linter.json5
+{
+  "rules": {
+    "@performance/high-frequency-log-check": "warn",
+  }
+}
+
+#### 选项
+
+该规则无需配置额外选项。
+
+#### 正例
+
+// Test.ets
+@Entry
+@Component
+struct Index {
+  build() {
+    Column() {
+      Scroll()
+        .onWillScroll(() => {
+          const TAG = 'onWillScroll';
+        })
+    }
+  }
+}
+
+#### 反例
+
+// Test.ets
+import hilog from '@ohos.hilog';
+
+@Entry
+@Component
+struct Index {
+  build() {
+    Column() {
+      Scroll()
+        .onWillScroll(() => {
+          // Avoid printing logs
+          hilog.info(1001, 'Index', 'onWillScroll');
+        })
+    }
+  }
+}
+
+#### 规则集
+
+plugin:@performance/recommended
+plugin:@performance/all
+
+Code Linter代码检查规则的配置指导请参考[Code Linter代码检查](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-code-linter)。

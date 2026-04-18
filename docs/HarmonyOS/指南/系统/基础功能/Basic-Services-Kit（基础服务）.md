@@ -1,0 +1,32 @@
+---
+title: "Basic Services Kit（基础服务）"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/basic-services-kit"
+menu_path:
+  - "指南"
+  - "系统"
+  - "基础功能"
+  - "Basic Services Kit（基础服务）"
+captured_at: "2026-04-17T01:35:54.714Z"
+---
+
+# Basic Services Kit（基础服务）
+
+-   **[Basic Services Kit简介](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/basic-services-kit-overview)**  
+    
+-   **[进程线程通信](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/app-events)**  
+    
+-   **[账号管理](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/account-management)**  
+    
+-   **[USB服务](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/usb)**  
+    
+-   **[升级服务](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/update)**  
+    
+-   **[剪贴板服务](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/pasteboard)**  
+    
+-   **[上传下载](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/upload-download)**  
+    
+-   **[压缩与解压](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/compress)**  
+    
+-   **[电源管理](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/powermgr)**  
+    
+-   **[打印](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/print)**

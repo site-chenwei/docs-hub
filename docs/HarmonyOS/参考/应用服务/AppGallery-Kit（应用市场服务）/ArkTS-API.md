@@ -1,0 +1,32 @@
+---
+title: "ArkTS API"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/store-arkts"
+menu_path:
+  - "参考"
+  - "应用服务"
+  - "AppGallery Kit（应用市场服务）"
+  - "ArkTS API"
+captured_at: "2026-04-17T01:48:56.498Z"
+---
+
+# ArkTS API
+
+-   **[moduleInstallManager (产品特性按需分发)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/store-moduleinstallmanager)**  
+    
+-   **[productViewManager (应用市场推荐)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/store-productviewmanager)**  
+    
+-   **[sceneManager （生态查询服务）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/store-scenemanager)**  
+    
+-   **[updateManager（更新功能）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/store-updatemanager)**  
+    
+-   **[attributionManager（应用归因服务）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/store-attributionmanager)**  
+    
+-   **[attributionTestManager（应用归因接入调试功能）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/store-attributiontestmanager)**  
+    
+-   **[privacyManager（隐私管理服务）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/store-privacymanager)**  
+    
+-   **[appInfoManager（应用元数据管理服务）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/appgallery-appinfomanager)**  
+    
+-   **[commentManager（应用评论服务）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/appgallery-commentmanager)**  
+    
+-   **[ArkTS API错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/store-error-code)**

@@ -1,0 +1,39 @@
+---
+title: "UI Design Kit（UI设计套件）"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-kit-guide"
+menu_path:
+  - "指南"
+  - "应用框架"
+  - "UI Design Kit（UI设计套件）"
+captured_at: "2026-04-17T01:35:46.057Z"
+---
+
+# UI Design Kit（UI设计套件）
+
+-   **[UI Design Kit简介](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-introduction)**  
+    
+-   **[图标处理](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-icon-process)**  
+    
+-   **[组件导航](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-navigation)**  
+    
+-   **[侧边栏样式](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-sidebar)**  
+    
+-   **[侧边栏菜单样式](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-side-menu)**  
+    
+-   **[底部页签](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-hds-tabs)**  
+    
+-   **[即时操作](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-snackbar)**  
+    
+-   **[核心操作栏](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-actionbar)**  
+    
+-   **[列表](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-list-item-card)**  
+    
+-   **[应用加载自定义Symbol](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-config-custom-symbol)**  
+    
+-   **[视效](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-visual-effect)**  
+    
+-   **[应用内多窗](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-multiwindowentryinapp)**  
+    
+-   **[沉浸光感](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-hds-component-material)**  
+    
+-   **[UI Design Kit常见问题](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ui-design-faq)**

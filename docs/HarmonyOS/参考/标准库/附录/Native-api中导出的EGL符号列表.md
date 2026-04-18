@@ -1,0 +1,67 @@
+---
+title: "Native api中导出的EGL符号列表"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/egl-symbol"
+menu_path:
+  - "参考"
+  - "标准库"
+  - "附录"
+  - "Native api中导出的EGL符号列表"
+captured_at: "2026-04-17T01:49:07.532Z"
+---
+
+# Native api中导出的EGL符号列表
+
+| 符号类型 | 符号名 |
+| :-- | :-- |
+| FUNC | eglChooseConfig |
+| FUNC | eglCopyBuffers |
+| FUNC | eglCreateContext |
+| FUNC | eglCreatePbufferSurface |
+| FUNC | eglCreatePixmapSurface |
+| FUNC | eglCreateWindowSurface |
+| FUNC | eglDestroyContext |
+| FUNC | eglDestroySurface |
+| FUNC | eglGetConfigAttrib |
+| FUNC | eglGetConfigs |
+| FUNC | eglGetCurrentDisplay |
+| FUNC | eglGetCurrentSurface |
+| FUNC | eglGetDisplay |
+| FUNC | eglGetError |
+| FUNC | eglGetProcAddress |
+| FUNC | eglInitialize |
+| FUNC | eglMakeCurrent |
+| FUNC | eglQueryContext |
+| FUNC | eglQueryString |
+| FUNC | eglQuerySurface |
+| FUNC | eglSwapBuffers |
+| FUNC | eglTerminate |
+| FUNC | eglWaitGL |
+| FUNC | eglWaitNative |
+| FUNC | eglBindTexImage |
+| FUNC | eglReleaseTexImage |
+| FUNC | eglSurfaceAttrib |
+| FUNC | eglSwapInterval |
+| FUNC | eglBindAPI |
+| FUNC | eglQueryAPI |
+| FUNC | eglCreatePbufferFromClientBuffer |
+| FUNC | eglReleaseThread |
+| FUNC | eglWaitClient |
+| FUNC | eglGetCurrentContext |
+| FUNC | eglCreateSync |
+| FUNC | eglDestroySync |
+| FUNC | eglClientWaitSync |
+| FUNC | eglGetSyncAttrib |
+| FUNC | eglCreateImage |
+| FUNC | eglDestroyImage |
+| FUNC | eglGetPlatformDisplay |
+| FUNC | eglCreatePlatformWindowSurface |
+| FUNC | eglCreatePlatformPixmapSurface |
+| FUNC | eglWaitSync |
+| FUNC | eglCreatePlatformWindowSurfaceEXT |
+| FUNC | eglCreatePlatformPixmapSurfaceEXT |
+| FUNC | eglSwapBuffersWithDamageEXT |
+| FUNC | eglGetCompositorTimingSupportedANDROID |
+| FUNC | eglGetFrameTimestampSupportedANDROID |
+| FUNC | eglPresentationTimeANDROID |
+| FUNC | eglGetNativeClientBufferANDROID |
+| FUNC | eglSwapBuffersWithDamageKHR |

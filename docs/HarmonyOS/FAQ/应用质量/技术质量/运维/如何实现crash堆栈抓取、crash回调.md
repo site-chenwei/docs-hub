@@ -1,0 +1,45 @@
+---
+title: "如何实现crash堆栈抓取、crash回调"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-faqs/faqs-performance-analysis-kit-19"
+menu_path:
+  - "FAQ"
+  - "应用质量"
+  - "技术质量"
+  - "运维"
+  - "如何实现crash堆栈抓取、crash回调"
+captured_at: "2026-04-17T02:02:57.258Z"
+---
+
+# 如何实现crash堆栈抓取、crash回调
+
+可以使用faultLogger.querySelfFaultLog获取故障日志，该方法可以捕获 C++ 程序故障、JS 程序故障和应用程序卡死故障。通过此方法，可以获取故障进程的进程 ID、故障进程的用户 ID、故障类型、日志生成时的秒级时间戳、故障原因、故障模块、故障摘要和故障日志全文。请参考以下示例代码：
+
+import { FaultLogger } from '@kit.PerformanceAnalysisKit';
+import { BusinessError } from '@kit.BasicServicesKit'
+
+async function getLog() {
+  try {
+    let value: Array<FaultLogger.FaultLogInfo> = await FaultLogger.query(FaultLogger.FaultType.JS\_CRASH);
+    if (value) {
+      console.info("value length is " + value.length);
+      let len: number = value.length;
+      for (let i = 0; i < len; i++) {
+        console.info("log: " + i);
+        console.info("Log pid: " + value\[i\].pid);
+        console.info("Log uid: " + value\[i\].uid);
+        console.info("Log type: " + value\[i\].type);
+        console.info("Log timestamp: " + value\[i\].timestamp);
+        console.info("Log reason: " + value\[i\].reason);
+        console.info("Log module: " + value\[i\].module);
+        console.info("Log summary: " + value\[i\].summary);
+        console.info("Log text: " + value\[i\].fullLog);
+      }
+    }
+  } catch (err) {
+    console.error(\`code: ${(err as BusinessError).code}, message: ${(err as BusinessError).message}\`);
+  }
+}
+
+**参考链接**
+
+[@ohos.faultLogger (故障日志获取)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-faultlogger)

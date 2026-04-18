@@ -1,0 +1,59 @@
+---
+title: "如何解决Web与List的嵌套滑动冲突"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-faqs/faqs-arkui-18"
+menu_path:
+  - "FAQ"
+  - "应用框架开发"
+  - "UI框架"
+  - "方舟UI框架（ArkUI）"
+  - "如何解决Web与List的嵌套滑动冲突"
+captured_at: "2026-04-17T02:03:02.984Z"
+---
+
+# 如何解决Web与List的嵌套滑动冲突
+
+可以设置组件的hitTestBehavior来避免这种情况，参考代码如下：
+
+import { webview } from '@kit.ArkWeb';
+
+@Entry
+@Component
+struct SlidingConflictBetweenWebAndList {
+  webviewController: webview.WebviewController = new webview.WebviewController();
+
+  build() {
+    List() {
+      ListItem() {
+        Web({
+          src: $rawfile('index.html'),
+          controller: this.webviewController
+        })
+          .width('100%')
+          .height(220)
+      }.hitTestBehavior(HitTestMode.Block)
+      ListItem() {
+        Web({
+          src: $rawfile('index.html'),
+          controller: this.webviewController
+        })
+          .width('100%')
+          .height(220)
+      }
+      ListItem() {
+        Text('1')
+      }
+      .height(220)
+      ListItem() {
+        Text('2')
+      }
+      .height(220)
+    }
+    .backgroundColor(Color.Blue)
+    .width('100%')
+    .height('100%')
+  }
+}
+
+**参考链接**
+
+[触摸测试控制](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-universal-attributes-hit-test-behavior)

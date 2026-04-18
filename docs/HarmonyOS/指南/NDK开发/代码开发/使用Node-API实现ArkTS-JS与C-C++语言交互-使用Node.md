@@ -1,0 +1,28 @@
+---
+title: "使用Node"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/using-napi-interaction-with-cpp"
+menu_path:
+  - "指南"
+  - "NDK开发"
+  - "代码开发"
+  - "使用Node-API实现ArkTS/JS与C/C++语言交互"
+captured_at: "2026-04-17T01:36:40.347Z"
+---
+
+# 使用Node-API实现ArkTS/JS与C/C++语言交互
+
+-   **[Node-API简介](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/napi-introduction)**  
+    
+-   **[Node-API接口返回状态码介绍](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/napi_status_introduction)**  
+    
+-   **[Node-API支持的数据类型和接口](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/napi-data-types-interfaces)**  
+    
+-   **[Node-API开发规范](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/napi-guidelines)**  
+    
+-   **[使用Node-API实现跨语言交互开发流程](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/use-napi-process)**  
+    
+-   **[Node-API使用指导](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/napi-use)**  
+    
+-   **[Node-API典型使用场景](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/napi-scenarios)**  
+    
+-   **[Node-API常见问题汇总](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/napi-questions)**

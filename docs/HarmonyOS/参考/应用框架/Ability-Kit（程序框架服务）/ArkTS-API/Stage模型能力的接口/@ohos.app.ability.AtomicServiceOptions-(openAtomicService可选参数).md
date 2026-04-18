@@ -1,0 +1,100 @@
+---
+title: "@ohos.app.ability.AtomicServiceOptions (openAtomicService可选参数)"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-app-ability-atomicserviceoptions"
+menu_path:
+  - "参考"
+  - "应用框架"
+  - "Ability Kit（程序框架服务）"
+  - "ArkTS API"
+  - "Stage模型能力的接口"
+  - "@ohos.app.ability.AtomicServiceOptions (openAtomicService可选参数)"
+captured_at: "2026-04-17T01:47:46.158Z"
+---
+
+# @ohos.app.ability.AtomicServiceOptions (openAtomicService可选参数)
+
+AtomicServiceOptions可以作为[openAtomicService()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-inner-application-uiabilitycontext#openatomicservice12)的入参，用于携带参数。继承于[StartOptions](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-app-ability-startoptions)。
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/bb/v3/_9xw3VtXSMSb0JMKlGtu3Q/note_3.0-zh-cn.png?HW-CC-KV=V1&HW-CC-Date=20260417T014747Z&HW-CC-Expire=86400&HW-CC-Sign=A9F0C054B0CAA3D8CA98F81A34B0A74A3C31602EDE1DC375787ABF32C71F01BE)
+
+本模块首批接口从API version 12 开始支持。后续版本的新增接口，采用上角标单独标记接口的起始版本。
+
+本模块接口仅可在Stage模型下使用。
+
+#### 导入模块
+
+```ts
+import { AtomicServiceOptions } from '@kit.AbilityKit';
+```
+
+#### AtomicServiceOptions
+
+#### \[h2\]属性
+
+**元服务API**：从API version 12开始，该接口支持在元服务中使用。
+
+**系统能力**：SystemCapability.Ability.AbilityRuntime.Core
+
+| 名称 | 类型 | 只读 | 可选 | 说明 |
+| :-- | :-- | :-- | :-- | :-- |
+| [flags](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-app-ability-wantconstant#flags) | number | 否 | 是 | 
+系统处理该次启动的方式。
+
+例如通过wantConstant.Flags.FLAG\_INSTALL\_ON\_DEMAND表示使用免安装能力。
+
+ |
+| parameters | Record<string, Object> | 否 | 是 | 表示额外参数描述。具体描述参考[Want](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-app-ability-want)中parameters字段描述。 |
+| completionHandlerForAtomicService20+ | [CompletionHandlerForAtomicService](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/apis-app-ability-completionhandlerforatomicservice) | 否 | 是 | 
+
+打开元服务结果的操作类，用于接收打开元服务的结果。
+
+**元服务API**：从API version 20开始，该接口支持在元服务中使用。
+
+ |
+
+**示例：**
+
+```ts
+import { UIAbility, AtomicServiceOptions, common, wantConstant, CompletionHandlerForAtomicService, FailureCode } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+
+export default class EntryAbility extends UIAbility {
+  onForeground() {
+    let completionHandler: CompletionHandlerForAtomicService = {
+      onAtomicServiceRequestSuccess(appId: string) {
+        hilog.info(0x0000, 'testTag', `appId:${appId}`);
+      },
+      onAtomicServiceRequestFailure(appId: string, failureCode: FailureCode, failureMessage: string) {
+        hilog.info(0x0000, 'testTag', `appId:${appId}, failureCode:${failureCode}, failureMessage:${failureMessage}`);
+      }
+    };
+
+    let options: AtomicServiceOptions = {
+      flags: wantConstant.Flags.FLAG_INSTALL_ON_DEMAND,
+      parameters: {
+        'demo.result': 123456
+      },
+      completionHandlerForAtomicService: completionHandler
+    };
+
+    try {
+      let appId: string = '6918661953712445909'; // 根据实际appId修改此值
+      this.context.openAtomicService(appId, options)
+        .then((result: common.AbilityResult) => {
+          // 执行正常业务
+          console.info('openAtomicService succeed');
+        })
+        .catch((err: BusinessError) => {
+          // 处理业务逻辑错误
+          console.error(`openAtomicService failed, code is ${err.code}, message is ${err.message}`);
+        });
+    } catch (err) {
+      // 处理入参错误异常
+      let code = (err as BusinessError).code;
+      let message = (err as BusinessError).message;
+      console.error(`openAtomicService failed, code is ${code}, message is ${message}`);
+    }
+  }
+}
+```

@@ -1,0 +1,678 @@
+---
+title: "基于AVPlayer播放格式化音频（C++）"
+source_url: "https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-playing-formatted-audio-based-avplayer-cpp"
+menu_path:
+  - "最佳实践"
+  - "媒体"
+  - "音频和视频"
+  - "音频播放系列开发实践"
+  - "基于AVPlayer播放格式化音频（C++）"
+captured_at: "2026-04-17T01:54:15.067Z"
+---
+
+# 基于AVPlayer播放格式化音频（C++）
+
+#### 概述
+
+AVPlayer可以用于播放格式化音频，支持WAV、MP3和FLAC等格式的音频。AVPlayer提供了ArkTS API和Native API，指导开发者使用AVPlayer的Native API实现播放格式化音频的功能，主要涉及基本播控、精准跳转、静音播放、倍速播放、音量控制、焦点管理、后台播放与接入播控中心、冷启动等开发场景。
+
+本文是音频播放系列文章的第4篇，实现的功能效果如下：
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/f0/v3/i2e9KrrlS8Ojg94wXeGVFg/zh-cn_image_0000002524217640.gif?HW-CC-KV=V1&HW-CC-Date=20260417T015416Z&HW-CC-Expire=86400&HW-CC-Sign=0CE3B93ED63FBB8F8D923E6AFE2E70D4EE3A02B4792E1A9C2E188F4DAFC99E38 "点击放大") ![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/16/v3/g0pp_2YDSJWoaXCgklFyFw/zh-cn_image_0000002555337515.gif?HW-CC-KV=V1&HW-CC-Date=20260417T015416Z&HW-CC-Expire=86400&HW-CC-Sign=677EBCE14F1BACB265F3D9323D891CD7BF81D2C0EBF547B77B151DDBCC9D418A "点击放大") ![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/c1/v3/uj9SB9oATnecIM-OwnsrLA/zh-cn_image_0000002524057652.gif?HW-CC-KV=V1&HW-CC-Date=20260417T015416Z&HW-CC-Expire=86400&HW-CC-Sign=6B395D5D8E64FD263FDFB1BC5F352AD940EFA39BB05E7C5ED9B82761618EC40D "点击放大")
+
+#### 场景分析
+
+| 
+场景名称
+
+ | 
+
+描述
+
+ | 
+
+实现方案
+
+ |
+| :-- | :-- | :-- |
+| 
+
+[基础播控](#section1764813377511)
+
+ | 
+
+音频资源的加载、播放、暂停、退出等操作。
+
+ | 
+
+使用[avplayer](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#概述)接口实现。
+
+ |
+| 
+
+[跳转播放](#section16920851193717)
+
+ | 
+
+滑动进度条精准跳转到指定时间进行播放。
+
+ | 
+
+使用[Slider组件](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-basic-components-slider)实现进度条，在[onChange()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-basic-components-slider#onchange)回调中触发进度调节获取目标时间，使用avplayer的[OH\_AVPlayer\_Seek()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_seek)接口，跳转到目标时间。
+
+ |
+| 
+
+[静音播放](#section125715278533)
+
+ | 
+
+点击按钮设置静音播放。
+
+ | 
+
+使用avplayer的[OH\_AVPlayer\_SetVolume()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setvolume)接口设置音量为0，进入静音状态。
+
+ |
+| 
+
+[切换歌曲播放](#section590418431566)
+
+ | 
+
+点击上一首或下一首或歌单列表中的歌曲进行不同歌曲播放。
+
+ | 
+
+使用[OH\_AVPlayer\_Reset()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_reset)接口重置播放器状态，给avplayer的fd或fdSrc属性赋值为新的歌曲资源，实现播放不同的歌曲功能。
+
+ |
+| 
+
+[倍速设置](#section189460361122)
+
+ | 
+
+滑动调节面板调节播放速度。
+
+ | 
+
+使用[OH\_AVPlayer\_SetPlaybackRate()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setplaybackspeed)接口设置播放倍速。
+
+ |
+| 
+
+[音量设置](#section88718617116)
+
+ | 
+
+滑动调节面板调节播放音量。
+
+ | 
+
+使用[OH\_AVPlayer\_SetVolume()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setvolume)设置播放音量。
+
+ |
+| 
+
+[接入播控中心](https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-playing-pcm-audio-based-audiorenderer#section06660114245)
+
+ | 
+
+通过播控中心，控制播放、暂停、切换音频、调整播放进度、切换循环模式
+
+ | 
+
+具体原理、方案和开发步骤参考[接入播控中心](https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-playing-pcm-audio-based-audiorenderer#section06660114245)。本篇文章不再赘述。
+
+ |
+| 
+
+[后台播放](https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-playing-pcm-audio-based-audiorenderer#section1749719114143)
+
+ | 
+
+音频切换到后台播放。
+
+ | 
+
+具体原理、方案和开发步骤参考[后台播放](https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-playing-pcm-audio-based-audiorenderer#section1749719114143)。本篇文章不再赘述。
+
+ |
+| 
+
+[接入播控中心冷启动和历史歌单](https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-playing-pcm-audio-based-audiorenderer#section476545143517)
+
+ | 
+
+应用退出后，播控中心显示历史歌单，点击播控中心播放按钮拉起应用播放，或者点击歌单拉起应用播放。
+
+ | 
+
+具体原理、方案和开发步骤参考[接入播控中心冷启动和历史歌单](https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-playing-pcm-audio-based-audiorenderer#section476545143517)。本篇文章不再赘述。
+
+ |
+
+#### 基础播控
+
+#### \[h2\]场景描述
+
+通过[avplayer](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#概述)接口实现核心音频播放控制能力，包括音频资源加载、播放、暂停、停止及退出等操作。
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/40/v3/zfT4qKfJQAKgQuOyAfaKTA/zh-cn_image_0000002555217551.gif?HW-CC-KV=V1&HW-CC-Date=20260417T015416Z&HW-CC-Expire=86400&HW-CC-Sign=C927EBFB78F101C3CC22417BF5DAA4E25C1A28DC0443DFDC6D11B2C99DE248C6 "点击放大")
+
+#### \[h2\]实现原理
+
+核心原理是使用[avplayer](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#概述)接口实现播放、暂停等功能，需要特别注意的是，播放器在执行不同的操作前，必须要保证此时处于正确的状态，比如执行播放操作前，只有当前状态在prepared/paused/completed时，才能正确执行，否则系统可能会抛出异常或生成其他未定义的行为。AVPlayer的播放状态和不同接口间的关系参考[使用AVPlayer播放音频](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/using-ndk-avplayer-for-playback)一节中的播放状态变化示意图。
+
+主要的开发步骤如下：
+
+1.  开发者可以通过[OH\_AVPlayer\_Create()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_create)构建一个avplayer实例，创建成功后，此时播放器处于idle状态。
+2.  使用[OH\_AVPlayer\_SetOnInfoCallback()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setoninfocallback)注册状态变化的回调，对状态变化做出响应。
+    
+    ![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/61/v3/stSdz3TDS0uYQZ7mPeOBsQ/caution_3.0-zh-cn.png?HW-CC-KV=V1&HW-CC-Date=20260417T015416Z&HW-CC-Expire=86400&HW-CC-Sign=CB0DC781868C1572E3BA57900F4071CA7EEDDD8FD2EB7C86BBA76288FA8CF3B6)
+    
+    因为AVPlayer播放器的接口是否能正常执行和当前的播放器状态有必然联系，建议开发者务必使用[OH\_AVPlayer\_SetOnInfoCallback()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setoninfocallback)注册状态变化的回调获取当前状态，保证在正确的状态下执行对应操作。以免发生异常，影响开发效率。
+    
+3.  使用[OH\_AVPlayer\_SetOnErrorCallback()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setonerrorcallback)接口设置异常信息的回调，发生异常后，监听错误事件，可以快速根据报错信息进行定位。
+4.  通过[OH\_AVPlayer\_SetFDSource()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setfdsource)设置播放资源，设置成功后，播放器会进入initialized状态。
+5.  执行[OH\_AVPlayer\_Prepare()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_prepare)接口准备播放音频，播放器会进入prepared状态。
+6.  执行[OH\_AVPlayer\_Play()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_play)接口，播放音频资源。
+    
+    ![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/1e/v3/m6frYpkiS_C3TktUhDR4OQ/caution_3.0-zh-cn.png?HW-CC-KV=V1&HW-CC-Date=20260417T015416Z&HW-CC-Expire=86400&HW-CC-Sign=D637ECCEC506D593213F77201B3531AAE870799CE5C1729FF02097F4EC75DD57)
+    
+    第4步设置完url、fdSrc等属性后，播放器并不是就立刻进入initialized状态；第5步执行完[OH\_AVPlayer\_Prepare()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_prepare)接口，播放器也不是立刻进入prepared，都是需在[OH\_AVPlayer\_SetOnInfoCallback()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setoninfocallback)注册状态变化的回调中，监听到播放器成功触发至initialized状态后，才能执行下一步的操作，否则接口会执行异常。
+    
+    7\. 执行[OH\_AVPlayer\_Pause()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_pause)接口，暂停音频资源。
+    
+    8\. 执行[OH\_AVPlayer\_Stop()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_stop)接口，停止播放音频资源。
+    
+    9\. 执行[OH\_AVPlayer\_Release()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_release)接口，销毁播放资源。
+    
+
+#### \[h2\]开发步骤
+
+1\. 通过[OH\_AVPlayer\_Create()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_create)创建一个AVPlayer实例。
+
+void AVPlayer::InitPlayer() {
+    // Check the residual status of the previous player
+    if (ohAVPlayer != nullptr) {
+        OH\_LOG\_INFO(LOG\_APP, "Previous audio player remained and release it.");
+        ReleasePlayer();
+    }
+
+    ohAVPlayer = OH\_AVPlayer\_Create();
+    if (ohAVPlayer == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "Create AVPlayer instance failed.");
+        return;
+    }
+    // ...
+
+    OH\_LOG\_INFO(LOG\_APP, "Init player successfully.");
+}
+
+2\. 使用[OH\_AVPlayer\_SetOnInfoCallback()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setoninfocallback)注册状态变化的回调，对状态变化做出响应。
+
+// Define OHAVPlayerOnInfoCallback function
+static void OHAVPlayerOnInfoCallback(OH\_AVPlayer \*player, AVPlayerOnInfoType type, OH\_AVFormat \*infoBody,
+                                     \[\[maybe\_unused\]\] void \*userData) {
+    if (player == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "OHAVPlayerOnInfoCallback: the player is null.");
+        return;
+    }
+    switch (type) {
+    case AV\_INFO\_TYPE\_STATE\_CHANGE: {
+        int32\_t playerState = 0;
+        int32\_t stateChangeReason = 0;
+        OH\_AVFormat\_GetIntValue(infoBody, OH\_PLAYER\_STATE, &playerState);
+        OH\_AVFormat\_GetIntValue(infoBody, OH\_PLAYER\_STATE\_CHANGE\_REASON, &stateChangeReason);
+        OH\_LOG\_INFO(LOG\_APP, "The player state has been changed, state: %{public}d, reason: %{public}d.", playerState,
+                    stateChangeReason);
+        OHAVPlayerOnStateChange(player, playerState);
+    } break;
+     // ...
+}
+
+// On player state change and process it
+static void OHAVPlayerOnStateChange(OH\_AVPlayer \*player, int32\_t playerState) {
+    AVPlayer::GetInstance().PlayerState = playerState;
+    switch (playerState) {
+    case AV\_IDLE:
+        OH\_LOG\_INFO(LOG\_APP, "playerState: AV\_IDLE.");
+        break;
+    case AV\_INITIALIZED:
+        // ...
+            // Prepare player
+            ret = OH\_AVPlayer\_Prepare(player);
+            // ...
+        break;
+    case AV\_PREPARED:
+        OH\_LOG\_INFO(LOG\_APP, "playerState: AV\_PREPARED.");
+        // ...
+            if (AVPlayer::GetInstance().WaitPlay) {
+                AVPlayer::GetInstance().PlaySong();
+            }
+            // ...
+        break;
+        // ...
+    default:
+        break;
+    }
+}
+
+3\. 使用[OH\_AVPlayer\_SetOnErrorCallback()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setonerrorcallback)设置异常信息的回调，发生异常后，监听错误事件。
+
+// Define OHAVPlayerOnErrorCallback function
+static void OHAVPlayerOnErrorCallback(\[\[maybe\_unused\]\] OH\_AVPlayer \*player, int32\_t errCode, const char \*errMsg,
+                                      \[\[maybe\_unused\]\] void \*userData) {
+    OH\_LOG\_ERROR(LOG\_APP, "OHAVPlayerOnErrorCallback, errCode: %{public}d, errMsg: %{public}s.", errCode, errMsg);
+}
+
+4\. 通过[OH\_AVPlayer\_SetFDSource()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setfdsource)设置播放资源。
+
+void AVPlayer::LoadSongInfo(uint32\_t songFd, uint32\_t songFileSize, uint32\_t songFileOffset) {
+    if (ohAVPlayer == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "The ohAVPlayer is null.");
+        return;
+    }
+
+    AVPlayerState playerState = AV\_IDLE;
+
+    auto ret = OH\_AVPlayer\_GetState(ohAVPlayer, &playerState);
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "Get player state failed, ret: %{public}d", ret);
+        return;
+    }
+
+    // When the application loads or plays the first song for the first time, the player does not need to be reset
+    // In addition, the player cannot be reset in idle state, otherwise an error will be reported
+    // When playing for the first time, the player is in idle state after creation.
+    if (playerState != AV\_IDLE) {
+        ret = OH\_AVPlayer\_Reset(ohAVPlayer);
+        if (ret != AV\_ERR\_OK) {
+            OH\_LOG\_ERROR(LOG\_APP, "Reset player failed, ret: %{public}d", ret);
+            return;
+        }
+    }
+
+    ret = OH\_AVPlayer\_SetFDSource(ohAVPlayer, songFd, songFileOffset, songFileSize);
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "Load song information failed, ret: %{public}d", ret);
+        return;
+    }
+
+    OH\_LOG\_INFO(LOG\_APP,
+                "Load song information successfully. "
+                "Song fd: %{public}d, "
+                "file size: %{public}d, "
+                "file offset: %{public}d.",
+                songFd, songFileSize, songFileOffset);
+}
+
+5\. 执行[OH\_AVPlayer\_Prepare()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_prepare)接口准备播放音频。
+
+// Prepare player
+ret = OH\_AVPlayer\_Prepare(player);
+if (ret != AV\_ERR\_OK) {
+    OH\_LOG\_ERROR(LOG\_APP, "Prepare player failed, ret: %{public}d", ret);
+    (void)OH\_AVPlayer\_Release(player);
+    player = nullptr;
+}
+
+6\. 执行[OH\_AVPlayer\_Play()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_play)接口，播放音频资源。
+
+void AVPlayer::PlaySong() {
+    if (ohAVPlayer == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "The ohAVPlayer is null.");
+        return;
+    }
+    if (PlayerState != AV\_PREPARED && PlayerState != AV\_PAUSED && PlayerState != AV\_STOPPED &&
+        PlayerState != AV\_COMPLETED) {
+        WaitPlay = true;
+        return;
+    }
+    auto ret = OH\_AVPlayer\_Play(ohAVPlayer);
+    WaitPlay = false;
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "Play song failed, ret: %{public}d", ret);
+        return;
+    }
+    OH\_LOG\_INFO(LOG\_APP, "Play song successfully.");
+}
+
+7\. 执行[OH\_AVPlayer\_Pause()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_pause)接口，暂停播放音频。
+
+void AVPlayer::PauseSong() {
+    if (ohAVPlayer == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "The ohAVPlayer is null.");
+        return;
+    }
+    auto ret = OH\_AVPlayer\_Pause(ohAVPlayer);
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "Pause song failed, ret: %{public}d", ret);
+        return;
+    }
+
+    OH\_LOG\_INFO(LOG\_APP, "Pause song successfully.");
+}
+
+8\. 执行[OH\_AVPlayer\_Stop()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_stop)接口，停止播放音频资源。
+
+void AVPlayer::StopSong() {
+    if (ohAVPlayer == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "The ohAVPlayer is null.");
+        return;
+    }
+    auto ret = OH\_AVPlayer\_Stop(ohAVPlayer);
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "Stop song failed, ret: %{public}d", ret);
+        return;
+    }
+    OH\_LOG\_INFO(LOG\_APP, "Stop song successfully.");
+}
+
+9\. 执行[OH\_AVPlayer\_Release()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_release)接口，销毁播放资源。
+
+void AVPlayer::ReleasePlayer() {
+    if (ohAVPlayer == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "The ohAVPlayer is null.");
+        return;
+    }
+    auto ret = OH\_AVPlayer\_Release(ohAVPlayer);
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "Release player failed, ret: %{public}d", ret);
+        return;
+    }
+    ohAVPlayer = nullptr;
+    OH\_LOG\_INFO(LOG\_APP, "Release player successfully.");
+}
+
+#### 跳转播放
+
+#### \[h2\]场景描述
+
+通过点击或拖动进度条精准跳转到指定时间进行播放。
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/c2/v3/gB8JLUlvQu2IdFhT7czuUg/zh-cn_image_0000002524217654.gif?HW-CC-KV=V1&HW-CC-Date=20260417T015416Z&HW-CC-Expire=86400&HW-CC-Sign=00DA2512B1C7D951D6EC683D34D78B56B0028ED42406E34560FB5B637A42A7CC "点击放大")
+
+#### \[h2\]实现原理
+
+使用[Slider组件](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-basic-components-slider)实现进度条，在[onChange()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-basic-components-slider#onchange)回调中触发进度调节获取目标时间，使用AVPlayer的[seek()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/arkts-apis-media-avplayer#seek9)接口，跳转到目标时间。
+
+#### \[h2\]开发步骤
+
+使用avplayer的[OH\_AVPlayer\_Seek()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_seek)接口，跳转到目标时间。
+
+void AVPlayer::SeekPlaySong(uint32\_t timeStamp) {
+    if (ohAVPlayer == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "The ohAVPlayer is null.");
+        return;
+    }
+    auto ret = OH\_AVPlayer\_Seek(ohAVPlayer, timeStamp, AV\_SEEK\_CLOSEST);
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "Seek song failed, ret: %{public}d", ret);
+        return;
+    }
+    OH\_LOG\_INFO(LOG\_APP, "Seek song successfully.");
+}
+
+#### 静音播放
+
+#### \[h2\]场景描述
+
+通过界面按钮快捷切换音频播放静音状态，实现一键开启或关闭静音。
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/b7/v3/feNsX5VHQOiCGJ4WtC1KtQ/zh-cn_image_0000002555337523.gif?HW-CC-KV=V1&HW-CC-Date=20260417T015416Z&HW-CC-Expire=86400&HW-CC-Sign=ACFED341A956536B34B3759B2DADDDAD06C02627B0F16948217E9EF3A1358729 "点击放大")
+
+#### \[h2\]实现原理
+
+使用avplayer的[OH\_AVPlayer\_SetVolume()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setvolume)接口设置音量为0，进入静音模式状态。
+
+#### \[h2\]开发步骤
+
+调用avplayer的[OH\_AVPlayer\_SetVolume()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setvolume)接口，如果确定开启静音模式，则将音量设置成0。
+
+void AVPlayer::SetSilentMode(bool isSilentMode) {
+    if (ohAVPlayer == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "The ohAVPlayer is null.");
+        return;
+    }
+    // If the isSilentMode is true, set the volume to 0; Otherwise, restore the latest volume value
+    float volume = isSilentMode ? 0 : lastVolume;
+    auto ret = OH\_AVPlayer\_SetVolume(ohAVPlayer, volume, volume);
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "SetSilentMode: set app volume failed, ret: %{public}d", ret);
+        return;
+    }
+    OH\_LOG\_INFO(LOG\_APP, "Set silent mode successfully.");
+}
+
+#### 切换歌曲播放
+
+#### \[h2\]场景描述
+
+点击上一首或下一首或歌单列表中的歌曲进行不同歌曲播放。
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/9e/v3/NLmkVy3HR7GBeRtYX3Dg7Q/zh-cn_image_0000002524057660.gif?HW-CC-KV=V1&HW-CC-Date=20260417T015416Z&HW-CC-Expire=86400&HW-CC-Sign=7937E7DC2C199DF09239B413D4C7CF199BEB4EF85DF5E797ABA4E5EED5F66673 "点击放大")
+
+#### \[h2\]实现原理
+
+使用[OH\_AVPlayer\_Reset()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_reset)接口重置播放器状态，给AVPlayer的fd或fdSrc属性赋值为新的歌曲资源，实现播放不同歌曲的功能。
+
+#### \[h2\]开发步骤
+
+1\. 停止当前播放的歌曲。
+
+void AVPlayer::StopSong() {
+    if (ohAVPlayer == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "The ohAVPlayer is null.");
+        return;
+    }
+    auto ret = OH\_AVPlayer\_Stop(ohAVPlayer);
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "Stop song failed, ret: %{public}d", ret);
+        return;
+    }
+    OH\_LOG\_INFO(LOG\_APP, "Stop song successfully.");
+}
+
+2\. 用[OH\_AVPlayer\_Reset()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_reset)接口重置播放器状态。
+
+ret = OH\_AVPlayer\_Reset(ohAVPlayer);
+if (ret != AV\_ERR\_OK) {
+    OH\_LOG\_ERROR(LOG\_APP, "Reset player failed, ret: %{public}d", ret);
+    return;
+}
+
+3.使用[OH\_AVPlayer\_SetFDSource()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setfdsource)设置播放资源。
+
+void AVPlayer::LoadSongInfo(uint32\_t songFd, uint32\_t songFileSize, uint32\_t songFileOffset) {
+    if (ohAVPlayer == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "The ohAVPlayer is null.");
+        return;
+    }
+
+    AVPlayerState playerState = AV\_IDLE;
+
+    auto ret = OH\_AVPlayer\_GetState(ohAVPlayer, &playerState);
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "Get player state failed, ret: %{public}d", ret);
+        return;
+    }
+
+    // When the application loads or plays the first song for the first time, the player does not need to be reset
+    // In addition, the player cannot be reset in idle state, otherwise an error will be reported
+    // When playing for the first time, the player is in idle state after creation.
+    if (playerState != AV\_IDLE) {
+        ret = OH\_AVPlayer\_Reset(ohAVPlayer);
+        if (ret != AV\_ERR\_OK) {
+            OH\_LOG\_ERROR(LOG\_APP, "Reset player failed, ret: %{public}d", ret);
+            return;
+        }
+    }
+
+    ret = OH\_AVPlayer\_SetFDSource(ohAVPlayer, songFd, songFileOffset, songFileSize);
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "Load song information failed, ret: %{public}d", ret);
+        return;
+    }
+
+    OH\_LOG\_INFO(LOG\_APP,
+                "Load song information successfully. "
+                "Song fd: %{public}d, "
+                "file size: %{public}d, "
+                "file offset: %{public}d.",
+                songFd, songFileSize, songFileOffset);
+}
+
+#### 倍速设置
+
+#### \[h2\]场景描述
+
+滑动倍速调节面板调节播放速度。
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/bf/v3/Dyy3hFM2SiqUPA_FP0jJLg/zh-cn_image_0000002555217553.gif?HW-CC-KV=V1&HW-CC-Date=20260417T015416Z&HW-CC-Expire=86400&HW-CC-Sign=1E06DBD816BFFB9376F011ED02252828FD373710B30FC431143B6F860B883926 "点击放大")
+
+#### \[h2\]实现原理
+
+通过调节面板获取目标速度值，传入[OH\_AVPlayer\_SetPlaybackRate()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setplaybackrate)接口中，实现设置播放速度的功能。
+
+#### \[h2\]开发步骤
+
+1\. 通过调节面板获取速度值，传入[OH\_AVPlayer\_SetPlaybackRate()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setplaybackrate)接口中。
+
+Slider({
+  value: this.speed,
+  min: 0.25,
+  max: 2,
+  step: 0.25,
+  style: SliderStyle.OutSet
+})
+  .layoutWeight(1)
+  .showTips(true, this.speed.toString())
+  .showSteps(true)
+  .onChange((value: number, mode: SliderChangeMode) => {
+    this.speed = value;
+    MediaControlCenter.getInstance().setSpeed(this.speed);
+    console.info('value:' + value + 'mode:' + mode.toString());
+  })
+
+2\. 使用[OH\_AVPlayer\_SetPlaybackRate()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setplaybackrate)接口设置播放倍速。
+
+void AVPlayer::SetPlayingSpeed(float speed) {
+    if (ohAVPlayer == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "The ohAVPlayer is null.");
+        return;
+    }
+    auto ret = OH\_AVPlayer\_SetPlaybackRate(ohAVPlayer, speed);
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "Set playing speed failed, ret: %{public}d", ret);
+        return;
+    }
+    OH\_LOG\_INFO(LOG\_APP, "Set playing speed successfully.");
+}
+
+#### 音量设置
+
+#### \[h2\]场景描述
+
+滑动音量调节面板调节播放音量。
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/45/v3/D-5V61fLRP2xE5Rkl_2Upg/zh-cn_image_0000002524217656.gif?HW-CC-KV=V1&HW-CC-Date=20260417T015416Z&HW-CC-Expire=86400&HW-CC-Sign=543B911D6DABBE45BE357D7DA7F5EBE14583C73945E2D2F1A3C13D570E653A96 "点击放大")
+
+#### \[h2\]实现原理
+
+通过调节面板获取目标音量值，输入到[OH\_AVPlayer\_SetVolume()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setvolume)接口中，实现设置播放音量的功能。
+
+#### \[h2\]开发步骤
+
+1\. 通过调节面板获取音量值，传入[OH\_AVPlayer\_SetVolume()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setvolume)接口中。
+
+Slider({
+  value: this.volume,
+  min: 0,
+  max: 1,
+  step: 0.1,
+  style: SliderStyle.OutSet
+})
+  .showTips(false)
+  .layoutWeight(1)
+  .onChange((value: number, mode: SliderChangeMode) => {
+    this.volume = value;
+    if (this.volume === 0) {
+      this.isSilentMode = true
+    } else {
+      this.isSilentMode = false;
+    }
+  })
+
+2\. 使用[OH\_AVPlayer\_SetVolume()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setvolume)设置播放音量。
+
+void AVPlayer::SetPlayingVolume(float volume) {
+    if (ohAVPlayer == nullptr) {
+        OH\_LOG\_ERROR(LOG\_APP, "The ohAVPlayer is null.");
+        return;
+    }
+    auto ret = OH\_AVPlayer\_SetVolume(ohAVPlayer, volume, volume);
+    if (ret != AV\_ERR\_OK) {
+        OH\_LOG\_ERROR(LOG\_APP, "Set app volume failed, ret: %{public}d", ret);
+        return;
+    }
+    lastVolume = volume;
+    OH\_LOG\_INFO(LOG\_APP, "Set app volume successfully.");
+}
+
+#### 常见问题
+
+#### \[h2\]执行AVPlayer的方法时失败，返回错误码3
+
+**问题现象**
+
+在调用AVPlayer的[OH\_AVPlayer\_Prepare()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_prepare)、[OH\_AVPlayer\_Play()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_play)、[OH\_AVPlayer\_Stop()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_stop)等方法时，会执行失败，返回错误码3。如以下场景。
+
+-   设置完url、fdSrc等属性后，代码下一行就立刻执行[OH\_AVPlayer\_Prepare()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_prepare)接口，执行出错，返回错误码3。
+-   同样，执行完[OH\_AVPlayer\_Prepare()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_prepare)接口，代码下一行立刻执行[OH\_AVPlayer\_Play()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_play)接口，执行出错，返回错误码3。
+
+**可能原因**
+
+通过[OH\_AVErrCode](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-native-averrors-h#oh_averrcode)错误码查出，错误码3对应的信息为“AV\_ERR\_INVALID\_VAL ”，可能得原因是AVPlayer的当前状态不支持此操作。AVPlayer播放器在执行不同的操作前，必须要保证此时处于正确的状态，比如执行播放操作前，只有当前状态在prepared/paused/completed时，才能正确执行。针对问题现象中举例的两种场景，其错误的原因可能如下。
+
+-   设置完url、fdSrc等属性后，AVPlayer并不是就立刻进入initialized状态，如果设置完url属性后就立刻执行[OH\_AVPlayer\_Prepare()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_prepare)接口，当代码运行此行时，AVPlayer的播放状态可能还是处于idle的状态，并没有变成initialized，这时就可能产生此错误。
+-   同样，执行完[OH\_AVPlayer\_Prepare()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_prepare)接口，AVPlayer也不是立刻进入prepared状态，如果此时立刻执行[OH\_AVPlayer\_Play()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_play)接口，AVPlayer的播放状态可能还没有变成prepared状态，执行就可能报错。
+
+**解决方案**
+
+1\. 先了解在AVPlayer的不同播放状态下，可以执行哪些接口。熟悉AVPlayer的播放状态和不同接口间的关系，可以参考[使用AVPlayer播放音频](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/using-ndk-avplayer-for-playback)一节中的播放状态变化示意图一节中的播放状态变化示意图。
+
+2\. 保证在在正确的播放状态下，执行对应的接口。建议开发者务必使用[OH\_AVPlayer\_SetOnInfoCallback()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_setoninfocallback)注册状态变化的回调，当监听到AVPlayer的播放状态到达目标状态时，执行对应的接口。当监听到AVPlayer处于initialized状态时，再执行[OH\_AVPlayer\_Prepare()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_prepare)接口，监听到AVPlayer处于prepared状态时，再执行[OH\_AVPlayer\_Play()](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/capi-avplayer-h#oh_avplayer_play)接口。
+
+// On player state change and process it
+static void OHAVPlayerOnStateChange(OH\_AVPlayer \*player, int32\_t playerState) {
+    AVPlayer::GetInstance().PlayerState = playerState;
+    switch (playerState) {
+    case AV\_IDLE:
+        OH\_LOG\_INFO(LOG\_APP, "playerState: AV\_IDLE.");
+        break;
+    case AV\_INITIALIZED:
+        // ...
+            // Prepare player
+            ret = OH\_AVPlayer\_Prepare(player);
+            // ...
+        break;
+    case AV\_PREPARED:
+        OH\_LOG\_INFO(LOG\_APP, "playerState: AV\_PREPARED.");
+        // ...
+            if (AVPlayer::GetInstance().WaitPlay) {
+                AVPlayer::GetInstance().PlaySong();
+            }
+            // ...
+        break;
+        // ...
+    default:
+        break;
+    }
+}
+
+#### 示例代码
+
+-   [基于AVPlayer播放格式化音频（C++）](https://gitcode.com/HarmonyOS_Samples/avplayer-play-formatted-audio-cpp)

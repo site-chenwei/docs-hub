@@ -1,0 +1,16 @@
+---
+title: "PDF Kit 常见问题"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/pdf-faq"
+menu_path:
+  - "指南"
+  - "应用服务"
+  - "PDF Kit（PDF服务）"
+  - "PDF Kit 常见问题"
+captured_at: "2026-04-17T01:36:20.602Z"
+---
+
+# PDF Kit 常见问题
+
+-   **[PDF Kit可以移除具体页面的页眉页脚、水印、背景吗？](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/pdf-faq-4)**  
+    
+-   **[PDF文档支持在线预览吗？](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/pdf-faq-4-online-preview)**

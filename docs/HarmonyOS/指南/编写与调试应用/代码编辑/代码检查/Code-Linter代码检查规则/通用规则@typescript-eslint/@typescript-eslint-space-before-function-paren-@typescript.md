@@ -1,0 +1,55 @@
+---
+title: "@typescript"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide_space-before-function-paren"
+menu_path:
+  - "指南"
+  - "编写与调试应用"
+  - "代码编辑"
+  - "代码检查"
+  - "Code Linter代码检查规则"
+  - "通用规则@typescript-eslint"
+  - "@typescript-eslint/space-before-function-paren"
+captured_at: "2026-04-17T01:36:46.176Z"
+---
+
+# @typescript-eslint/space-before-function-paren
+
+强制在函数名和括号之间保持一致的空格风格。
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/b4/v3/HwVOyLbyT1WVEWW0gzf09w/note_3.0-zh-cn.png?HW-CC-KV=V1&HW-CC-Date=20260417T013646Z&HW-CC-Expire=86400&HW-CC-Sign=7C282CC532545FBC0B29B6BA3AA22991C8AE6E3AFEFD9A888B6B771671F0F62E)
+
+-   该规则默认要求函数名和括号间有空格。如需修改请参考[选项](#section182418564158)。
+-   该规则建议在对.ts文件进行检查时使用。如需检查.ets文件，建议使用[@hw-stylistic/space-before-function-paren](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-space-before-function-paren-stylistic)。
+
+#### 规则配置
+
+// code-linter.json5
+{
+  "rules": {
+    "@typescript-eslint/space-before-function-paren": "error"
+  }
+}
+
+#### 选项
+
+详情请参考[@typescript-eslint/space-before-function-paren选项](https://eslint.nodejs.cn/docs/rules/space-before-function-paren#选项)。
+
+#### 正例
+
+// 默认foo和(之间需要一个空格
+export function foo () {
+  // ...
+}
+
+#### 反例
+
+// 默认foo和(之间需要一个空格
+export function foo() {
+  // ...
+}
+
+#### 规则集
+
+plugin:@typescript-eslint/all
+
+Code Linter代码检查规则的配置指导请参考[Code Linter代码检查](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-code-linter)。

@@ -1,0 +1,53 @@
+---
+title: "ArkTS API"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/mdm-arkts"
+menu_path:
+  - "参考"
+  - "系统"
+  - "基础功能"
+  - "MDM Kit（企业设备管理服务）"
+  - "ArkTS API"
+captured_at: "2026-04-17T01:48:31.526Z"
+---
+
+# ArkTS API
+
+-   **[@ohos.enterprise.accountManager（账户管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-accountmanager)**  
+    
+-   **[@ohos.enterprise.adminManager（admin权限管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-adminmanager)**  
+    
+-   **[@ohos.enterprise.applicationManager（应用管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-applicationmanager)**  
+    
+-   **[@ohos.enterprise.bluetoothManager（蓝牙管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-bluetoothmanager)**  
+    
+-   **[@ohos.enterprise.browser（浏览器管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-browser)**  
+    
+-   **[@ohos.enterprise.bundleManager（包管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-bundlemanager)**  
+    
+-   **[@ohos.enterprise.common（Enterprise公共模块）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-common)**  
+    
+-   **[@ohos.enterprise.deviceControl（设备控制管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-devicecontrol)**  
+    
+-   **[@ohos.enterprise.deviceInfo（设备信息管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-deviceinfo)**  
+    
+-   **[@ohos.enterprise.deviceSettings （设备设置管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-devicesettings)**  
+    
+-   **[@ohos.enterprise.locationManager（位置服务管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-locationmanager)**  
+    
+-   **[@ohos.enterprise.networkManager（网络管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-networkmanager)**  
+    
+-   **[@ohos.enterprise.restrictions （限制类策略）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-restrictions)**  
+    
+-   **[@ohos.enterprise.securityManager（安全管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-securitymanager)**  
+    
+-   **[@ohos.enterprise.systemManager （系统管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-systemmanager)**  
+    
+-   **[@ohos.enterprise.usbManager（USB管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-usbmanager)**  
+    
+-   **[@ohos.enterprise.wifiManager（Wi-Fi管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-wifimanager)**  
+    
+-   **[@ohos.enterprise.EnterpriseAdminExtensionAbility（企业设备管理扩展能力）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterpriseadminextensionability)**  
+    
+-   **[@ohos.enterprise.telephonyManager（通话管理）](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-enterprise-telephonymanager)**  
+    
+-   **[application](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/mdm-arkts-application)**

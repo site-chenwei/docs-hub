@@ -1,0 +1,61 @@
+---
+title: "@correctness/listen"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide_listen-default-network-change"
+menu_path:
+  - "指南"
+  - "编写与调试应用"
+  - "代码编辑"
+  - "代码检查"
+  - "Code Linter代码检查规则"
+  - "正确性规则@correctness"
+  - "@correctness/listen-default-network-change"
+captured_at: "2026-04-17T01:36:48.367Z"
+---
+
+# @correctness/listen-default-network-change
+
+建议应用监听默认网络的变化，关闭原有网络的数据传输，并使用新网络建立数据传输。
+
+该规则仅在联网类应用检查整个工程时才生效。
+
+#### 规则配置
+
+// code-linter.json5
+{
+  "rules": {
+    "@correctness/listen-default-network-change": "suggestion"
+  }
+}
+
+#### 选项
+
+该规则无需配置额外选项。
+
+#### 正例
+
+// With the ohos.permission.GET\_NETWORK\_INFO permission configured
+import connection from '@ohos.net.connection';
+export function test() {
+  const defaultNet = connection.getDefaultNetSync();
+  const netCapabilities = connection.getNetCapabilitiesSync(defaultNet);
+  let bearerTypes = netCapabilities.bearerTypes;
+  const netConnection = connection.createNetConnection();
+  netConnection.on('netCapabilitiesChange', (netCap: connection.NetCapabilityInfo) => {
+    const newBearTypes = netCap.netCap.bearerTypes;
+    if (newBearTypes !== bearerTypes) {
+      bearerTypes = newBearTypes;
+    }
+  });
+}
+
+#### 反例
+
+// With the ohos.permission.GET\_NETWORK\_INFO permission configured
+// import connection from '@ohos.net.connection';
+// The \`on(type: 'netCapabilitiesChange', callback: Callback<connection.NetCapabilityInfo>)\`, \`getDefaultNet\`/\`getDefaultNetSync\` and \`getNetCapabilities\`/\`getNetCapabilitiesSync\` functions are not called.
+
+#### 规则集
+
+plugin:@correctness/all
+
+Code Linter代码检查规则的配置指导请参考[Code Linter代码检查](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-code-linter)。

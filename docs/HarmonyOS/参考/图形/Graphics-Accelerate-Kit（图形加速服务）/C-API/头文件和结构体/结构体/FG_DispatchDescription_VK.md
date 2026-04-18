@@ -1,0 +1,111 @@
+---
+title: "FG_DispatchDescription_VK"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_f_g___dispatch_description___v_k"
+menu_path:
+  - "参考"
+  - "图形"
+  - "Graphics Accelerate Kit（图形加速服务）"
+  - "C API"
+  - "头文件和结构体"
+  - "结构体"
+  - "FG_DispatchDescription_VK"
+captured_at: "2026-04-17T01:48:51.820Z"
+---
+
+# FG\_DispatchDescription\_VK
+
+#### 概述
+
+此结构体描述下发帧生成命令[HMS\_FG\_Dispatch\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_dispatch_vk)需要的参数信息，每一帧都需要进行更新。该接口仅适配Vulkan图形API平台。
+
+**起始版本：** 5.0.0(12)
+
+**相关模块：** [GraphicsAccelerate](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate)
+
+**所在头文件：** [frame\_generation\_vk.h](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/frame__generation__vk_8h)
+
+#### 汇总
+
+#### \[h2\]成员变量
+
+| 名称 | 描述 |
+| :-- | :-- |
+| [FG\_ImageInfo\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_f_g___image_info___v_k) [inputColorInfo](#inputcolorinfo) | 真实渲染帧颜色缓冲区图像实例，该图像实例由[HMS\_FG\_CreateImage\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_createimage_vk)创建，由[HMS\_FG\_DestroyImage\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_destroyimage_vk)销毁。 |
+| [FG\_ImageInfo\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_f_g___image_info___v_k) [inputDepthStencilInfo](#inputdepthstencilinfo) | 真实渲染帧深度模板缓冲区图像实例，该图像实例由[HMS\_FG\_CreateImage\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_createimage_vk)创建，由[HMS\_FG\_DestroyImage\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_destroyimage_vk)销毁。 |
+| [FG\_ImageInfo\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_f_g___image_info___v_k) [outputColorInfo](#outputcolorinfo) | 预测帧缓冲区图像实例 ，该图像实例由[HMS\_FG\_CreateImage\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_createimage_vk)创建，由[HMS\_FG\_DestroyImage\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_destroyimage_vk)销毁。 |
+| [FG\_Mat4x4](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_f_g___mat4x4) [viewProj](#viewproj) | 真实渲染帧视图投影矩阵，即世界空间到相机裁剪空间坐标系转换矩阵，矩阵必须是4x4列主序的矩阵。 |
+| [FG\_Mat4x4](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_f_g___mat4x4) [invViewProj](#invviewproj) | 真实渲染帧视图投影逆矩阵，即相机裁剪空间到世界空间坐标系转换矩阵，矩阵必须是4x4列主序的矩阵。 |
+| VkCommandBuffer [vkCommandBuffer](#vkcommandbuffer) | 用于录入超帧绘制指令的命令缓冲区。 |
+| uint8\_t [frameIdx](#frameidx) | 当前帧序号，序号计数从0开始。该值必须小于[FG\_ContextDescription\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_f_g___context_description___v_k)中的framesInFlight。 |
+
+#### 结构体成员变量说明
+
+#### \[h2\]frameIdx
+
+```c
+uint8_t FG_DispatchDescription_VK::frameIdx
+```
+
+**描述**
+
+当前帧序号，序号计数从0开始。该值必须小于[FG\_ContextDescription\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_f_g___context_description___v_k)中的framesInFlight。
+
+#### \[h2\]inputColorInfo
+
+```c
+FG_ImageInfo_VK FG_DispatchDescription_VK::inputColorInfo
+```
+
+**描述**
+
+真实渲染帧颜色缓冲图像实例，该图像实例由[HMS\_FG\_CreateImage\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_createimage_vk)创建，由[HMS\_FG\_DestroyImage\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_destroyimage_vk)销毁。
+
+#### \[h2\]inputDepthStencilInfo
+
+```c
+FG_ImageInfo_VK FG_DispatchDescription_VK::inputDepthStencilInfo
+```
+
+**描述**
+
+真实渲染帧深度模板缓冲区图像实例，该图像实例由[HMS\_FG\_CreateImage\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_createimage_vk)创建，由[HMS\_FG\_DestroyImage\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_destroyimage_vk)销毁。
+
+#### \[h2\]invViewProj
+
+```c
+FG_Mat4x4 FG_DispatchDescription_VK::invViewProj
+```
+
+**描述**
+
+真实渲染帧视图投影逆矩阵，即相机裁剪空间到世界空间坐标系转换矩阵，矩阵必须是4x4列主序的矩阵。
+
+#### \[h2\]outputColorInfo
+
+```c
+FG_ImageInfo_VK FG_DispatchDescription_VK::outputColorInfo
+```
+
+**描述**
+
+预测帧缓冲区图像实例，该图像实例由[HMS\_FG\_CreateImage\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_createimage_vk)创建，由[HMS\_FG\_DestroyImage\_VK](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/_graphics_accelerate#hms_fg_destroyimage_vk)销毁。
+
+#### \[h2\]viewProj
+
+```c
+FG_Mat4x4 FG_DispatchDescription_VK::viewProj
+```
+
+**描述**
+
+真实渲染帧视图投影矩阵，即世界空间到相机裁剪空间坐标系转换矩阵，矩阵必须是4x4列主序的矩阵。
+
+#### \[h2\]vkCommandBuffer
+
+```c
+VkCommandBuffer FG_DispatchDescription_VK::vkCommandBuffer
+```
+
+**描述**
+
+用于录入超帧绘制指令的命令缓冲区。

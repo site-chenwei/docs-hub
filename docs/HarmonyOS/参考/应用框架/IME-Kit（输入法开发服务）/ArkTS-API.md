@@ -1,0 +1,28 @@
+---
+title: "ArkTS API"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ime-arkts"
+menu_path:
+  - "参考"
+  - "应用框架"
+  - "IME Kit（输入法开发服务）"
+  - "ArkTS API"
+captured_at: "2026-04-17T01:48:15.125Z"
+---
+
+# ArkTS API
+
+-   **[@ohos.InputMethodExtensionAbility (InputMethodExtensionAbility)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-inputmethod-extension-ability)**  
+    
+-   **[@ohos.InputMethodExtensionContext (InputMethodExtensionContext)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-inputmethod-extension-context)**  
+    
+-   **[@ohos.inputMethod.Panel (输入法面板)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-inputmethod-panel)**  
+    
+-   **[@ohos.InputMethodSubtype (输入法子类型)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-inputmethod-subtype)**  
+    
+-   **[@ohos.inputMethod (输入法框架)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-inputmethod)**  
+    
+-   **[@ohos.inputMethodEngine (输入法服务)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-inputmethodengine)**  
+    
+-   **[@ohos.inputMethodList (输入法切换列表控件)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-inputmethodlist)**  
+    
+-   **[@ohos.inputMethod.ExtraConfig (输入法扩展信息)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-inputmethod-extraconfig)**

@@ -1,0 +1,72 @@
+---
+title: "ArkTS卡片使用自定义字体"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-ui-widget-load-custom-font"
+menu_path:
+  - "指南"
+  - "应用框架"
+  - "Form Kit（卡片开发服务）"
+  - "ArkTS卡片开发（推荐）"
+  - "ArkTS卡片提供方开发指导"
+  - "ArkTS卡片UI界面开发"
+  - "ArkTS卡片使用自定义字体"
+captured_at: "2026-04-17T01:35:44.406Z"
+---
+
+# ArkTS卡片使用自定义字体
+
+API version 22开始新增了[ohos.graphics.text.FontCollection.getLocalInstance](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-graphics-text#getlocalinstance22)接口获取本地字体集实例，应用可以通过这个本地实例为卡片加载自定义字体。
+
+#### 开发步骤
+
+1.  创建动态卡片：按照[创建ArkTS卡片](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-ui-widget-creation)里的描述创建动态卡片。
+    
+2.  在项目entry\\src\\main\\resources\\rawfile目录下添加自定义字体文件xxx.ttf。
+    
+3.  页面布局代码实现entry/src/main/ets/widget/pages/WidgetCard.ets。
+    
+    在卡片页面中布局两个按钮，点击按钮load font或按钮unload font，调用本地字体集实例的loadFontSync、unloadFontSync进行字体的加载、卸载。
+    
+
+```typescript
+// entry/src/main/ets/widget/pages/WidgetCard.ets
+import { text } from '@kit.ArkGraphics2D';
+
+@Entry
+@Component
+struct loadFontSyncCard {
+  // 在这里使用getLocalInstance访问本地字体集实例
+  private fc: text.FontCollection = text.FontCollection.getLocalInstance();
+  @State content: string = '默认字体';
+
+  build() {
+    Column({ space: 10 }) {
+      Text(this.content)
+        .fontFamily('custom') // 在此处声明组件使用自定义字体
+      Button('load font')
+        .onClick(() => {
+          // 在此处加载自定义字体文件
+          this.fc.loadFontSync('custom', $rawfile('xxx.ttf'));
+          this.content = '自定义字体';
+        })
+      Button('unload font')
+        .onClick(() => {
+          this.fc.unloadFontSync('custom');
+          this.content = '默认字体';
+        })
+    }.width('100%')
+    .height('100%')
+    .justifyContent(FlexAlign.Center)
+  }
+}
+```
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/42/v3/7nWCSzn5SJa7QZ8rXLnOeQ/note_3.0-zh-cn.png?HW-CC-KV=V1&HW-CC-Date=20260417T013545Z&HW-CC-Expire=86400&HW-CC-Sign=3F7E3E7BBB633B9CE7894C831324645FDFD98EFA333A8756A8760839DCAD6AE6)
+
+-   本地字体集可加载多个自定义字体，内存限制最多可加载20MB的字体。
+    
+-   同一应用的所有卡片共用一个本地字体集实例。加载或卸载自定义字体后，所有卡片的字体显示会同步更新。
+    
+
+#### \[h2\]运行结果
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/c6/v3/whsTYJF7TwWlmdNfzziExg/zh-cn_image_0000002568898921.gif?HW-CC-KV=V1&HW-CC-Date=20260417T013545Z&HW-CC-Expire=86400&HW-CC-Sign=E382C66F6B8A743F55299CE5AC1EDBA8A69F31C8A23376927DD77B2FEFD4555F)

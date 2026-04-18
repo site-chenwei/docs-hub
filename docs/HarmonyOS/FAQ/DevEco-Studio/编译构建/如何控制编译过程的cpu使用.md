@@ -1,0 +1,39 @@
+---
+title: "如何控制编译过程的cpu使用"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-faqs/faqs-compiling-and-building-60"
+menu_path:
+  - "FAQ"
+  - "DevEco Studio"
+  - "编译构建"
+  - "如何控制编译过程的cpu使用"
+captured_at: "2026-04-17T02:03:21.790Z"
+---
+
+# 如何控制编译过程的cpu使用
+
+在模块级 build-profile.json5 的 buildOption.arguments 中添加相关配置，指定 CMake 编译参数。示例如下：
+
+```json
+{
+  "buildOption": {
+    "arguments": [
+      "-DCMAKE_BUILD_PARALLEL_LEVEL=2",
+      "-DCMAKE_LINK_PARALLEL_LEVEL=2"
+    ]
+  }
+}
+```
+
+此配置指定编译和链接分别使用 2 个处理器。
+
+"buildOption": {
+  "externalNativeOptions": {
+    "path": "../cpp/CMakeLists.txt",
+    "arguments": "-DCMAKE\_JOB\_POOL\_COMPILE:STRING=compile -DCMAKE\_JOB\_POOL\_LINK:STRING=link -DCMAKE\_JOB\_POOLS:STRING=compile=2;link=2",
+    "cppFlags": "",
+    "abiFilters": \[
+      "x86\_64",
+      "arm64-v8a"
+    \]
+  }
+},

@@ -1,0 +1,22 @@
+---
+title: "ArkTS API"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/call-arkts"
+menu_path:
+  - "参考"
+  - "应用服务"
+  - "Call Service Kit（通话服务）"
+  - "ArkTS API"
+captured_at: "2026-04-17T01:48:56.886Z"
+---
+
+# ArkTS API
+
+-   **[voipCall (应用内通话管理)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/call-voipcall)**  
+    
+-   **[CallerInfoQueryExtensionAbility (来去电信息查询扩展Ability)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/callservicekit-callerinfoquery-extension-ability)**  
+    
+-   **[CallerInfoQueryExtensionContext (来去电信息查询扩展Context)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/callservicekit-callerinfoquery-extension-context)**  
+    
+-   **[numberIdentify (号码识别查询基本能力)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/callservicekit-numberldentify)**  
+    
+-   **[ArkTS API错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/call-error-code)**

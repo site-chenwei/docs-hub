@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "defaults": {
+    "include": ["*.md", "**/*.md"],
+    "exclude": [
+      "**/*:Zone.Identifier",
+      "**/catalog.md",
+      "**/README.md"
+    ],
+    "section_from": ["menu_path[0]", "rel_path[0]"],
+    "doc_type_rules": [
+      {"match": "path_contains", "any": ["接口文档", "/api/", "参考"], "type": "api"},
+      {"match": "path_contains", "any": ["FAQ", "常见问题"], "type": "faq"},
+      {"match": "path_contains", "any": ["最佳实践"], "type": "practice"},
+      {"match": "path_contains", "any": ["指南", "guide"], "type": "guide"}
+    ],
+    "nav_rules": {
+      "filenames": ["catalog.md", "README.md", "index.md"],
+      "min_body_chars": 300
+    },
+    "chunk": {
+      "target_chars": 1200,
+      "max_chars": 1500,
+      "overlap_chars": 150
+    }
+  },
+  "docsets": [
+    {
+      "id": "harmonyos",
+      "name": "HarmonyOS",
+      "root": "docs/HarmonyOS"
+    },
+    {
+      "id": "pinduoduo",
+      "name": "拼多多开放平台",
+      "root": "docs/拼多多"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+---
+title: "Device Security Kit（设备安全服务）"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/device-security-kit-guide"
+menu_path:
+  - "指南"
+  - "系统"
+  - "安全"
+  - "Device Security Kit（设备安全服务）"
+captured_at: "2026-04-17T01:35:49.771Z"
+---
+
+# Device Security Kit（设备安全服务）
+
+-   **[Device Security Kit简介](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-introduction)**  
+    
+-   **[服务配额](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-quota)**  
+    
+-   **[开发准备](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-prepare)**  
+    
+-   **[应用设备状态检测](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-deviceverify-develop)**  
+    
+-   **[安全检测](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-safetydetect-develop)**  
+    
+-   **[可信应用服务](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-taas-dev)**  
+    
+-   **[数字盾服务](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-trustedauth-service)**  
+    
+-   **[安全审计](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-audit)**  
+    
+-   **[业务风险检测](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-brid-develop)**  
+    
+-   **[查询设备安全模式(C/C++)](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-securitymode)**  
+    
+-   **[反诈选择器](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-antifraudpicker)**  
+    
+-   **[防窥保护](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-dlpantipeep)**  
+    
+-   **[病毒防护服务管理(C/C++)](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-vps-c)**  
+    
+-   **[超级隐私模式](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-superprivacymode)**  
+    
+-   **[个人数据处理说明](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-personal-data)**  
+    
+-   **[附录](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/devicesecurity-appendix)**

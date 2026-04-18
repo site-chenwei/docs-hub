@@ -1,0 +1,107 @@
+---
+title: "slider"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-components-basic-slider"
+menu_path:
+  - "参考"
+  - "应用框架"
+  - "ArkUI（方舟UI框架）"
+  - "JS组件"
+  - "兼容JS的类Web开发范式（ArkUI.Full）"
+  - "基础组件"
+  - "slider"
+captured_at: "2026-04-17T01:48:01.764Z"
+---
+
+# slider
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/f8/v3/EToGsWZaTU6eFoaQHXB1yw/note_3.0-zh-cn.png?HW-CC-KV=V1&HW-CC-Date=20260417T014804Z&HW-CC-Expire=86400&HW-CC-Sign=7147530B28F9EC5BB053F55E1A1B7D80DA5B488DD71401FA2C631AA17FEE7CB1)
+
+从API version 4开始支持。后续版本如有新增内容，则采用上角标单独标记该内容的起始版本。
+
+滑动条组件，用来快速调节设置值，如音量、亮度等。
+
+#### 子组件
+
+不支持。
+
+#### 属性
+
+除支持[通用属性](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-components-common-attributes)外，还支持以下属性：
+
+| 名称 | 类型 | 默认值 | 必填 | 描述 |
+| :-- | :-- | :-- | :-- | :-- |
+| min | number | 0 | 否 | 滑动选择器的最小值。 |
+| max | number | 100 | 否 | 滑动选择器的最大值。 |
+| step | number | 1 | 否 | 每次滑动的步长。 |
+| value | number | 0 | 否 | 滑动选择器的初始值。 |
+| mode5+ | string | outset | 否 | 
+滑动条样式：
+
+\- outset：滑块在滑杆上；
+
+\- inset：滑块在滑杆内。
+
+ |
+| showsteps5+ | boolean | false | 否 | 是否显示步长标识。true表示显示步长标识，false表示不显示步长标识。 |
+| showtips5+ | boolean | false | 否 | 滑动时是否有气泡提示百分比。true表示有气泡提示百分比，false表示没有气泡提示百分比。 |
+
+#### 样式
+
+除支持[通用样式](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-components-common-styles)外，还支持如下样式：
+
+| 名称 | 类型 | 默认值 | 必填 | 描述 |
+| :-- | :-- | :-- | :-- | :-- |
+| color | <color> | #19000000 | 否 | 滑动条的背景颜色。 |
+| selected-color | <color> | #ff007dff | 否 | 滑动条的已选择颜色。 |
+| block-color | <color> | #ffffff | 否 | 滑动条的滑块颜色。 |
+
+#### 事件
+
+除支持[通用事件](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-components-common-events)外，还支持如下事件：
+
+| 名称 | 参数 | 描述 |
+| :-- | :-- | :-- |
+| change | ChangeEvent | 选择值发生变化时触发该事件。 |
+
+**表1** ChangeEvent
+
+| 属性 | 类型 | 说明 |
+| :-- | :-- | :-- |
+| value5+ | number | 当前slider的进度值。 |
+| mode5+ | string | 
+当前change事件的类型，可选值为：
+
+\- start：slider的值开始改变。
+
+\- move：slider的值跟随手指拖动中。
+
+\- end：slider的值结束改变。
+
+\- click：slider的值在点击进度条后改变。
+
+ |
+
+#### 示例
+
+```html
+<!-- xxx.hml -->
+<div class="container">
+    <slider min="0" max="100" value="{{ value }}" mode="outset" showtips="true"></slider>
+    <slider class="slider" min="0" max="100" value="{{ value }}" step="20" mode="inset"  showtips="true"></slider>
+    <slider class="slider" min="0" max="100" value="{{ value }}" showsteps="true" step="20" mode="inset"  showtips="false"></slider>
+</div>
+```
+
+```css
+/* xxx.css */
+.container {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.slider{
+    margin-top: 100px;
+}
+```
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/aa/v3/X6C4f5ApQNOe88QO43mqxA/zh-cn_image_0000002538021152.png?HW-CC-KV=V1&HW-CC-Date=20260417T014804Z&HW-CC-Expire=86400&HW-CC-Sign=276002D486612E06DFC884C3A0BEBC3523FB07538A07695D838B645410A60461)

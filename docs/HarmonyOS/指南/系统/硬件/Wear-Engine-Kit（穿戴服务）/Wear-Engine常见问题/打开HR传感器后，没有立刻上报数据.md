@@ -1,0 +1,16 @@
+---
+title: "打开HR传感器后，没有立刻上报数据"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/wearengine_faq-4"
+menu_path:
+  - "指南"
+  - "系统"
+  - "硬件"
+  - "Wear Engine Kit（穿戴服务）"
+  - "Wear Engine常见问题"
+  - "打开HR传感器后，没有立刻上报数据"
+captured_at: "2026-04-17T01:36:00.304Z"
+---
+
+# 打开HR传感器后，没有立刻上报数据
+
+设备底层计算HR数据需要一定的时间，不同的设备由于性能差异所需时间不同，等待一段时间后方可收到上报数据。

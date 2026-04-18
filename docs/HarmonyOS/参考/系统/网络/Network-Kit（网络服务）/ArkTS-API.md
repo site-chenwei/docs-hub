@@ -1,0 +1,45 @@
+---
+title: "ArkTS API"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/network-api-arkts"
+menu_path:
+  - "参考"
+  - "系统"
+  - "网络"
+  - "Network Kit（网络服务）"
+  - "ArkTS API"
+captured_at: "2026-04-17T01:48:22.509Z"
+---
+
+# ArkTS API
+
+-   **[@ohos.net.connection (网络连接管理)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-net-connection)**  
+    
+-   **[@ohos.net.ethernet (以太网连接管理)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-net-ethernet)**  
+    
+-   **[@ohos.net.http (数据请求)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-http)**  
+    
+-   **[@ohos.net.mdns (MDNS管理)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-net-mdns)**  
+    
+-   **[@ohos.net.policy (网络策略管理)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-net-policy)**  
+    
+-   **[@ohos.net.socket (Socket连接)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-socket)**  
+    
+-   **[@ohos.net.statistics (流量管理)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-net-statistics)**  
+    
+-   **[@ohos.net.sharing (网络共享管理)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-net-sharing)**  
+    
+-   **[@ohos.net.vpnExtension (VPN增强管理)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-net-vpnextension)**  
+    
+-   **[@ohos.net.vpn (VPN管理)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-net-vpn)**  
+    
+-   **[@ohos.net.webSocket (WebSocket连接)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-websocket)**  
+    
+-   **[@ohos.net.netFirewall (网络防火墙)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-net-netfirewall)**  
+    
+-   **[@ohos.net.networkSecurity (网络安全校验)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-networksecurity)**  
+    
+-   **[@ohos.net.eap (扩展认证)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-net-eap)**  
+    
+-   **[@ohos.app.ability.VpnExtensionAbility (三方VPN能力)](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-vpnextensionability)**  
+    
+-   **[VpnExtensionContext](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-inner-application-vpnextensioncontext)**

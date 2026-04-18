@@ -1,0 +1,21 @@
+---
+title: "WebView安全"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/standard-security-debug"
+menu_path:
+  - "指南"
+  - "应用体验建议"
+  - "应用安全隐私体验建议"
+  - "安全"
+  - "WebView安全"
+captured_at: "2026-04-17T01:36:53.340Z"
+---
+
+# WebView安全
+
+<table><tbody><tr><th class="firstcol" id="mcps1.3.1.1.3.1.1" valign="top" width="20%"><p>描述</p></th><td class="cellrowborder" valign="top" width="80%"><p>不加载不安全的URL或页面。</p></td></tr><tr><th class="firstcol" id="mcps1.3.1.1.3.2.1" valign="top" width="20%"><p>类型</p></th><td class="cellrowborder" valign="top" width="80%"><p>建议</p></td></tr><tr><th class="firstcol" id="mcps1.3.1.1.3.3.1" valign="top" width="20%"><p>适用设备</p></th><td class="cellrowborder" valign="top" width="80%"><p>手机，平板，PC/2in1，智慧屏，车机</p></td></tr><tr><th class="firstcol" id="mcps1.3.1.1.3.4.1" valign="top" width="20%"><p>应用形态适用性</p></th><td class="cellrowborder" valign="top" width="80%"><p>鸿蒙应用，鸿蒙元服务</p></td></tr><tr><th class="firstcol" id="mcps1.3.1.1.3.5.1" valign="top" width="20%"><p>说明</p></th><td class="cellrowborder" valign="top" width="80%"><p>实现方案参考<a href="https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-harmony-application-security#section1113104054110" target="_blank">最佳实践</a></p></td></tr></tbody></table>
+
+<table><tbody><tr><th class="firstcol" id="mcps1.3.2.1.3.1.1" valign="top" width="20%"><p>描述</p></th><td class="cellrowborder" valign="top" width="80%"><p>不能将mixedMode属性配置成All。</p></td></tr><tr><th class="firstcol" id="mcps1.3.2.1.3.2.1" valign="top" width="20%"><p>类型</p></th><td class="cellrowborder" valign="top" width="80%"><p>建议</p></td></tr><tr><th class="firstcol" id="mcps1.3.2.1.3.3.1" valign="top" width="20%"><p>适用设备</p></th><td class="cellrowborder" valign="top" width="80%"><p>手机，平板，PC/2in1，智慧屏，车机</p></td></tr><tr><th class="firstcol" id="mcps1.3.2.1.3.4.1" valign="top" width="20%"><p>应用形态适用性</p></th><td class="cellrowborder" valign="top" width="80%"><p>鸿蒙应用，鸿蒙元服务</p></td></tr><tr><th class="firstcol" id="mcps1.3.2.1.3.5.1" valign="top" width="20%"><p>说明</p></th><td class="cellrowborder" valign="top" width="80%"><p>实现方案参考<a href="https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-harmony-application-security#section4947114114317" target="_blank">最佳实践</a></p></td></tr></tbody></table>
+
+<table><tbody><tr><th class="firstcol" id="mcps1.3.3.1.3.1.1" valign="top" width="20%"><p>描述</p></th><td class="cellrowborder" valign="top" width="80%"><p>在加载webview页面时不得在SSL校验出错时继续加载页面。</p></td></tr><tr><th class="firstcol" id="mcps1.3.3.1.3.2.1" valign="top" width="20%"><p>类型</p></th><td class="cellrowborder" valign="top" width="80%"><p>规则</p></td></tr><tr><th class="firstcol" id="mcps1.3.3.1.3.3.1" valign="top" width="20%"><p>适用设备</p></th><td class="cellrowborder" valign="top" width="80%"><p>手机，平板，PC/2in1，智慧屏，车机，穿戴</p></td></tr><tr><th class="firstcol" id="mcps1.3.3.1.3.4.1" valign="top" width="20%"><p>应用形态适用性</p></th><td class="cellrowborder" valign="top" width="80%"><p>鸿蒙应用，鸿蒙元服务</p></td></tr><tr><th class="firstcol" id="mcps1.3.3.1.3.5.1" valign="top" width="20%"><p>说明</p></th><td class="cellrowborder" valign="top" width="80%"><p>实现方案参考<a href="https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-harmony-application-security#section1256314434316" target="_blank">最佳实践</a></p></td></tr></tbody></table>
+
+<table><tbody><tr><th class="firstcol" id="mcps1.3.4.1.3.1.1" valign="top" width="20%"><p>描述</p></th><td class="cellrowborder" valign="top" width="80%"><p>未经用户同意不得在WebView页面返回位置信息。</p></td></tr><tr><th class="firstcol" id="mcps1.3.4.1.3.2.1" valign="top" width="20%"><p>类型</p></th><td class="cellrowborder" valign="top" width="80%"><p>规则</p></td></tr><tr><th class="firstcol" id="mcps1.3.4.1.3.3.1" valign="top" width="20%"><p>适用设备</p></th><td class="cellrowborder" valign="top" width="80%"><p>手机，平板，PC/2in1，智慧屏，车机，穿戴</p></td></tr><tr><th class="firstcol" id="mcps1.3.4.1.3.4.1" valign="top" width="20%"><p>应用形态适用性</p></th><td class="cellrowborder" valign="top" width="80%"><p>鸿蒙应用，鸿蒙元服务</p></td></tr><tr><th class="firstcol" id="mcps1.3.4.1.3.5.1" valign="top" width="20%"><p>说明</p></th><td class="cellrowborder" valign="top" width="80%"><p>实现方案参考<a href="https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-harmony-application-security#section12671987440" target="_blank">最佳实践</a></p></td></tr></tbody></table>

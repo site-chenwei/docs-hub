@@ -1,0 +1,205 @@
+---
+title: "@ohos.ability.screenLockFileManager (锁屏敏感数据管理)"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-screenlockfilemanager"
+menu_path:
+  - "参考"
+  - "应用框架"
+  - "Ability Kit（程序框架服务）"
+  - "ArkTS API"
+  - "通用能力的接口(推荐)"
+  - "@ohos.ability.screenLockFileManager (锁屏敏感数据管理)"
+captured_at: "2026-04-17T01:47:46.967Z"
+---
+
+# @ohos.ability.screenLockFileManager (锁屏敏感数据管理)
+
+敏感数据密钥在锁屏后会触发销毁，销毁后敏感数据无法读写，需解锁屏幕触发恢复敏感数据密钥后方可访问。本模块提供应用锁屏下敏感数据保护的能力，支持申请和释放锁屏下敏感数据访问权限等。
+
+![](https://contentcenter-vali-drcn.dbankcdn.cn/pvt_2/DeveloperAlliance_scene_100_1/c8/v3/PeaVujlrT-KSKCarYtmL8w/note_3.0-zh-cn.png?HW-CC-KV=V1&HW-CC-Date=20260417T014748Z&HW-CC-Expire=86400&HW-CC-Sign=2E4E8D5C1228DB51E6A1BF0AEFDE2D30243C9315511E3CAC3AD7810997C33B36)
+
+本模块首批接口从API version 12 开始支持。后续版本的新增接口，采用上角标单独标记接口的起始版本。
+
+#### 导入模块
+
+```ts
+import { screenLockFileManager } from '@kit.AbilityKit';
+```
+
+#### DataType
+
+枚举，指定锁屏下访问的敏感数据类型。
+
+**系统能力：** SystemCapability.Security.ScreenLockFileManager
+
+| 名称 | 值 | 说明 |
+| :-- | :-- | :-- |
+| MEDIA\_DATA | 0x00000001 | 媒体类型数据。 |
+| ALL\_DATA | 0xffffffff | 所有敏感加密数据。 |
+
+#### AccessStatus
+
+表示锁屏下敏感数据访问权限申请的状态枚举。
+
+**系统能力：** SystemCapability.Security.ScreenLockFileManager
+
+| 名称 | 值 | 说明 |
+| :-- | :-- | :-- |
+| ACCESS\_DENIED | \-1 | 拒绝授予锁屏下敏感数据访问。 |
+| ACCESS\_GRANTED | 0 | 授予锁屏下敏感数据访问。 |
+
+#### ReleaseStatus
+
+表示锁屏下敏感数据访问权限释放的状态枚举。
+
+**系统能力：** SystemCapability.Security.ScreenLockFileManager
+
+| 名称 | 值 | 说明 |
+| :-- | :-- | :-- |
+| RELEASE\_DENIED | \-1 | 拒绝锁屏下敏感数据访问释放。 |
+| RELEASE\_GRANTED | 0 | 释放锁屏下敏感数据访问。 |
+
+#### KeyStatus18+
+
+表示锁屏下敏感数据访问权限的状态枚举。
+
+**系统能力：** SystemCapability.Security.ScreenLockFileManager
+
+| 名称 | 值 | 说明 |
+| :-- | :-- | :-- |
+| KEY\_NOT\_EXIST | \-2 | 应用未开启锁屏敏感数据保护功能。 |
+| KEY\_RELEASED | \-1 | 锁屏敏感数据访问权限已释放。 |
+| KEY\_EXIST | 0 | 应用可以访问锁屏敏感数据。 |
+
+#### screenLockFileManager.acquireAccess
+
+acquireAccess(): AccessStatus
+
+以同步方法申请锁屏下应用敏感数据访问权限。锁屏后，敏感数据无法被访问，但可通过调用该方法，访问本应用的敏感数据。
+
+**系统能力：** SystemCapability.Security.ScreenLockFileManager
+
+**返回值：**
+
+| 类型 | 说明 |
+| :-- | :-- |
+| [AccessStatus](#accessstatus) | 锁屏下敏感数据访问权限申请的状态。 |
+
+**错误码：**
+
+以下错误码的详细介绍请参见[通用错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-universal)和[ohos.screenLockFileManager错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-screenlockfilemanager)。
+
+| 错误码ID | 错误信息 |
+| :-- | :-- |
+| 801 | The specified SystemCapability name was not found. |
+| 29300002 | The system ability work abnormally. |
+| 29300003 | The application is not enabled the data protection under lock screen. |
+| 29300004 | File access is denied. |
+
+**示例：**
+
+```ts
+// 申请锁屏下应用敏感数据访问权限
+import { screenLockFileManager } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+
+try {
+    let acquireStatus = screenLockFileManager.acquireAccess();
+    if (acquireStatus === screenLockFileManager.AccessStatus.ACCESS_GRANTED) {
+        hilog.info(0x0000, 'testTag', 'acquireAccess successfully.');
+    }
+} catch (err) {
+    let message = (err as BusinessError).message;
+    hilog.error(0x0000, 'testTag', 'acquireAccess failed: %{public}s', message);
+}
+```
+
+#### screenLockFileManager.releaseAccess
+
+releaseAccess(): ReleaseStatus
+
+以同步方法取消锁屏下本应用敏感数据访问权限。
+
+**系统能力：** SystemCapability.Security.ScreenLockFileManager
+
+**返回值：**
+
+| 类型 | 说明 |
+| :-- | :-- |
+| [ReleaseStatus](#releasestatus) | 锁屏下敏感数据访问权限释放的状态。 |
+
+**错误码：**
+
+以下错误码的详细介绍请参见[通用错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-universal)和[ohos.screenLockFileManager错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-screenlockfilemanager)。
+
+| 错误码ID | 错误信息 |
+| :-- | :-- |
+| 801 | The specified SystemCapability name was not found. |
+| 29300002 | The system ability work abnormally. |
+| 29300003 | The application is not enabled the data protection under lock screen. |
+| 29300005 | File access was not acquired. |
+
+**示例：**
+
+```ts
+// 释放锁屏下应用敏感数据访问权限
+import { screenLockFileManager } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+
+try {
+    let releaseStatus = screenLockFileManager.releaseAccess();
+    if (releaseStatus === screenLockFileManager.ReleaseStatus.RELEASE_GRANTED) {
+        hilog.info(0x0000, 'testTag', 'releaseAccess successfully.');
+    }
+} catch (err) {
+    let message = (err as BusinessError).message;
+    hilog.error(0x0000, 'testTag', 'releaseAccess failed: %{public}s', message);
+}
+```
+
+#### screenLockFileManager.queryAppKeyState18+
+
+queryAppKeyState(): KeyStatus
+
+以同步方法查询锁屏下本应用敏感数据访问权限。
+
+**系统能力：** SystemCapability.Security.ScreenLockFileManager
+
+**返回值：**
+
+| 类型 | 说明 |
+| :-- | :-- |
+| [KeyStatus](#keystatus18) | 锁屏下敏感数据访问权限的状态。 |
+
+**错误码：**
+
+以下错误码的详细介绍请参见[通用错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-universal)和[ohos.screenLockFileManager错误码](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/errorcode-screenlockfilemanager)。
+
+| 错误码ID | 错误信息 |
+| :-- | :-- |
+| 801 | The specified SystemCapability name was not found. |
+| 29300002 | The system ability work abnormally. |
+
+**示例：**
+
+```ts
+// 查询锁屏下应用敏感数据访问权限
+import { screenLockFileManager } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+
+try {
+    let keyStatus = screenLockFileManager.queryAppKeyState();
+    if (keyStatus === screenLockFileManager.KeyStatus.KEY_NOT_EXIST) {
+        hilog.info(0x0000, 'testTag', 'Key does not exist.');
+    } else if (keyStatus === screenLockFileManager.KeyStatus.KEY_RELEASED) {
+        hilog.info(0x0000, 'testTag', 'Key has been released.');
+    } else if (keyStatus === screenLockFileManager.KeyStatus.KEY_EXIST) {
+        hilog.info(0x0000, 'testTag', 'Key exists.');
+    }
+} catch (err) {
+    let message = (err as BusinessError).message;
+    hilog.error(0x0000, 'testTag', 'queryAppKeyState failed: %{public}s', message);
+}
+```

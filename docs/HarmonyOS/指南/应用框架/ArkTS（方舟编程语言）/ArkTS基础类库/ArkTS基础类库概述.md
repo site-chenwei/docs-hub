@@ -1,0 +1,17 @@
+---
+title: "ArkTS基础类库概述"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-utils-overview"
+menu_path:
+  - "指南"
+  - "应用框架"
+  - "ArkTS（方舟编程语言）"
+  - "ArkTS基础类库"
+  - "ArkTS基础类库概述"
+captured_at: "2026-04-17T01:35:34.049Z"
+---
+
+# ArkTS基础类库概述
+
+ArkTS基础类库是一个功能齐全的API集合，设计了一系列关键且实用的功能模块。
+
+ArkTS基础类库主要提供了[XML生成解析转换](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/xml-overview)、[二进制Buffer](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/buffer)、[多种容器类库](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/container-overview)、[URL字符串解析](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-url)和[高精度浮点计算](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-arkts-decimal)等能力，简化开发工作，提升开发效率。

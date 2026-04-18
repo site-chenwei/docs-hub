@@ -1,0 +1,36 @@
+---
+title: "bundleManager"
+source_url: "https://developer.huawei.com/consumer/cn/doc/harmonyos-references/bundlemanager"
+menu_path:
+  - "参考"
+  - "应用框架"
+  - "Ability Kit（程序框架服务）"
+  - "ArkTS API"
+  - "接口依赖的元素及定义"
+  - "bundleManager"
+captured_at: "2026-04-17T01:47:47.861Z"
+---
+
+# bundleManager
+
+-   **[AbilityInfo](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-bundlemanager-abilityinfo)**  
+    
+-   **[ApplicationInfo](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-bundlemanager-applicationinfo)**  
+    
+-   **[BundleInfo](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-bundlemanager-bundleinfo)**  
+    
+-   **[ElementName](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-bundlemanager-elementname)**  
+    
+-   **[ExtensionAbilityInfo](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-bundlemanager-extensionabilityinfo)**  
+    
+-   **[HapModuleInfo](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-bundlemanager-hapmoduleinfo)**  
+    
+-   **[LauncherAbilityInfo](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-bundlemanager-launcherabilityinfo)**  
+    
+-   **[Metadata](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-bundlemanager-metadata)**  
+    
+-   **[OverlayModuleInfo](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-bundlemanager-overlaymoduleinfo)**  
+    
+-   **[Skill](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-bundlemanager-skill)**  
+    
+-   **[ShortcutInfo](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/js-apis-bundlemanager-shortcutinfo)**
