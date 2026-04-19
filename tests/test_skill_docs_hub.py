@@ -554,7 +554,7 @@ class DocsHubSearchSkillTest(unittest.TestCase):
         self.assertEqual(["sub/nav.md"], [row["rel_path"] for row in visible_rows])
         self.assertTrue(visible_rows[0]["is_nav"])
 
-    def test_title_fallback_prefers_h1_then_filename_stem(self) -> None:
+    def test_title_fallback_prefers_markdown_heading_then_filename_stem(self) -> None:
         hub_root = self.make_hub()
         self.write_doc(
             hub_root,
@@ -585,13 +585,31 @@ class DocsHubSearchSkillTest(unittest.TestCase):
             stemonlysentinel
             """,
         )
+        self.write_doc(
+            hub_root,
+            "sub/setext-title.md",
+            """
+            ---
+            source_url: "https://example.com/setext-title"
+            menu_path:
+              - "指南"
+            ---
+
+            Setext Derived Title
+            ====================
+
+            setexttitlesentinel
+            """,
+        )
         self.run_build(hub_root)
 
         h1_rows = self.run_search(hub_root, "h1titlesentinel", "--docset", "testset")
         stem_rows = self.run_search(hub_root, "stemonlysentinel", "--docset", "testset")
+        setext_rows = self.run_search(hub_root, "setexttitlesentinel", "--docset", "testset")
 
         self.assertEqual("Heading Derived Title", h1_rows[0]["title"])
         self.assertEqual("stem-only", stem_rows[0]["title"])
+        self.assertEqual("Setext Derived Title", setext_rows[0]["title"])
 
     def test_match_all_with_long_and_short_tokens_requires_both(self) -> None:
         hub_root = self.make_hub()
@@ -630,6 +648,175 @@ class DocsHubSearchSkillTest(unittest.TestCase):
         self.run_build(hub_root)
         rows = self.run_search(hub_root, "alphalongtoken", "光标", "--match", "all", "--docset", "testset")
         self.assertEqual(["sub/both.md"], [row["rel_path"] for row in rows])
+
+    def test_multi_word_phrase_falls_back_to_split_terms(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/phrase-fallback.md",
+            """
+            ---
+            title: "phrase fallback"
+            source_url: "https://example.com/phrase-fallback"
+            menu_path:
+              - "指南"
+            ---
+
+            # phrase fallback
+
+            输入法组件支持光标自动跟随能力。
+            """,
+        )
+        self.run_build(hub_root)
+        rows = self.run_search(hub_root, "输入法 光标 跟随", "--docset", "testset")
+        self.assertEqual(["sub/phrase-fallback.md"], [row["rel_path"] for row in rows])
+        self.assertIn("【输入法】", rows[0]["snippet"])
+
+    def test_multi_phrase_fallback_merges_split_results(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/input-method.md",
+            """
+            ---
+            title: "input method"
+            source_url: "https://example.com/input-method"
+            menu_path:
+              - "指南"
+            ---
+
+            # input method
+
+            输入法服务能力说明
+            """,
+        )
+        self.write_doc(
+            hub_root,
+            "sub/cursor-follow.md",
+            """
+            ---
+            title: "cursor follow"
+            source_url: "https://example.com/cursor-follow"
+            menu_path:
+              - "指南"
+            ---
+
+            # cursor follow
+
+            光标跟随体验优化
+            """,
+        )
+        self.run_build(hub_root)
+        rows = self.run_search(hub_root, "输入法 服务", "光标 跟随", "--docset", "testset")
+        self.assertEqual(
+            {"sub/input-method.md", "sub/cursor-follow.md"},
+            {row["rel_path"] for row in rows},
+        )
+
+    def test_fallback_prefers_more_matched_terms_over_title_only_match(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/title-only.md",
+            """
+            ---
+            title: "alpha title"
+            source_url: "https://example.com/title-only"
+            menu_path:
+              - "指南"
+            ---
+
+            # alpha title
+
+            noise
+            """,
+        )
+        self.write_doc(
+            hub_root,
+            "sub/multi-hit.md",
+            """
+            ---
+            title: "multi hit"
+            source_url: "https://example.com/multi-hit"
+            menu_path:
+              - "指南"
+            ---
+
+            # multi hit
+
+            alpha gamma delta
+            """,
+        )
+        self.run_build(hub_root)
+        rows = self.run_search(hub_root, "alpha delta gamma", "--docset", "testset")
+        self.assertEqual(["sub/multi-hit.md", "sub/title-only.md"], [row["rel_path"] for row in rows])
+        self.assertGreater(rows[0]["matched_terms_count"], rows[1]["matched_terms_count"])
+
+    def test_or_query_prefers_documents_matching_more_keywords(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/title-alpha.md",
+            """
+            ---
+            title: "alpha title"
+            source_url: "https://example.com/title-alpha"
+            menu_path:
+              - "指南"
+            ---
+
+            # alpha title
+
+            noise
+            """,
+        )
+        self.write_doc(
+            hub_root,
+            "sub/body-alpha-gamma-delta.md",
+            """
+            ---
+            title: "body keywords"
+            source_url: "https://example.com/body-keywords"
+            menu_path:
+              - "指南"
+            ---
+
+            # body keywords
+
+            alpha gamma delta
+            """,
+        )
+        self.run_build(hub_root)
+        rows = self.run_search(hub_root, "alpha", "gamma", "delta", "--docset", "testset")
+        self.assertEqual(
+            ["sub/body-alpha-gamma-delta.md", "sub/title-alpha.md"],
+            [row["rel_path"] for row in rows],
+        )
+        self.assertGreater(rows[0]["matched_terms_count"], rows[1]["matched_terms_count"])
+
+    def test_title_match_uses_title_snippet_when_body_has_no_keyword(self) -> None:
+        hub_root = self.make_hub()
+        self.write_doc(
+            hub_root,
+            "sub/title-snippet.md",
+            """
+            ---
+            title: "api.error.1001"
+            source_url: "https://example.com/title-snippet"
+            menu_path:
+              - "指南"
+            ---
+
+            # heading
+
+            body without the token
+            """,
+        )
+        self.run_build(hub_root)
+        rows = self.run_search(hub_root, "api.error.1001", "--docset", "testset")
+        self.assertEqual(["sub/title-snippet.md"], [row["rel_path"] for row in rows])
+        self.assertEqual("title", rows[0]["snippet_source"])
+        self.assertIn("【api.error.1001】", rows[0]["snippet"])
 
     def test_snippet_is_centered_on_hit_and_highlighted(self) -> None:
         hub_root = self.make_hub()

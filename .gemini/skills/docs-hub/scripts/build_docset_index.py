@@ -34,6 +34,7 @@ from _common import (  # noqa: E402
     WarningSink,
     derive_doc_type,
     derive_section,
+    extract_primary_heading,
     extract_symbols,
     is_nav_page,
     load_docsets,
@@ -78,7 +79,7 @@ CREATE TABLE IF NOT EXISTS meta (
 );
 """
 
-BUILD_LOGIC_VERSION = "6"
+BUILD_LOGIC_VERSION = "7"
 
 # 本次 build 写入文档数达到或超过此值时跑一次 FTS5 optimize；否则跳过以免小增量时的无谓合并。
 OPTIMIZE_THRESHOLD = 500
@@ -103,7 +104,16 @@ def iter_candidate_files(root: Path, includes: list[str], excludes: list[str]):
     exclude_spec = compile_pathspec(excludes)
     for dirpath, dirnames, filenames in os.walk(root, followlinks=False):
         base = Path(dirpath)
-        dirnames[:] = [name for name in dirnames if not (base / name).is_symlink()]
+        kept_dirnames: list[str] = []
+        for name in dirnames:
+            dir_path = base / name
+            if dir_path.is_symlink():
+                continue
+            rel_dir = dir_path.relative_to(root).as_posix()
+            if exclude_spec.match_file(rel_dir + "/"):
+                continue
+            kept_dirnames.append(name)
+        dirnames[:] = kept_dirnames
         for filename in filenames:
             path = base / filename
             if path.is_symlink() or not path.is_file():
@@ -288,12 +298,7 @@ def build_docset(hub_root: Path, docset: dict[str, Any], defaults: dict[str, Any
 
         title = str(fm.get("title") or "").strip()
         if not title:
-            # 从首个 # 标题派生
-            for line in body.splitlines():
-                line = line.strip()
-                if line.startswith("# "):
-                    title = line[2:].strip()
-                    break
+            title = extract_primary_heading(body)
             if not title:
                 title = Path(rel).stem
                 warn.add(rel, "missing_title", f"fallback to filename stem: {title}")

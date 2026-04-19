@@ -28,6 +28,7 @@ from build_docset_index import DocsetBuildError, build_docset  # noqa: E402
 
 
 _FTS_SPECIAL = re.compile(r'[()":*\-+\^]')
+_QUERY_SPLIT_RE = re.compile(r"[\s,，、;；]+")
 
 
 def fts_escape(token: str) -> str:
@@ -114,6 +115,25 @@ def _dedupe_terms(keywords: list[str]) -> list[str]:
     return ordered
 
 
+def expand_keywords_for_fallback(keywords: list[str]) -> list[str]:
+    expanded: list[str] = []
+    seen: set[str] = set()
+    for keyword in keywords:
+        keyword = keyword.strip()
+        if not keyword:
+            continue
+        for part in _QUERY_SPLIT_RE.split(keyword):
+            part = part.strip()
+            if not part:
+                continue
+            marker = part.casefold()
+            if marker in seen:
+                continue
+            seen.add(marker)
+            expanded.append(part)
+    return expanded
+
+
 def build_highlighted_snippet(text: str, keywords: list[str], max_len: int = 200) -> str:
     compact = text.replace("\n", " ").strip()
     if not compact:
@@ -148,6 +168,120 @@ def build_highlighted_snippet(text: str, keywords: list[str], max_len: int = 200
 
     pattern = re.compile("|".join(re.escape(term) for term in terms), re.IGNORECASE)
     return pattern.sub(lambda match: f"【{match.group(0)}】", snippet)
+
+
+def text_contains_keyword(text: str, keywords: list[str]) -> bool:
+    folded = text.casefold()
+    return any(keyword.casefold() in folded for keyword in keywords if keyword.strip())
+
+
+def choose_snippet_text(row: sqlite3.Row, keywords: list[str]) -> tuple[str, str]:
+    body = str(row["body"] or "")
+    chunk_title = str(row["chunk_title"] or "")
+    title = str(row["title"] or "")
+    symbols = str(row["chunk_symbols"] or "")
+
+    if body and text_contains_keyword(body, keywords):
+        return body, "body"
+    if chunk_title and text_contains_keyword(chunk_title, keywords):
+        return chunk_title, "title"
+    if title and text_contains_keyword(title, keywords):
+        return title, "title"
+    if symbols and text_contains_keyword(symbols, keywords):
+        return symbols, "symbols"
+    return body or chunk_title or title or symbols, "body"
+
+
+def count_row_keyword_matches(row: sqlite3.Row, keywords: list[str]) -> int:
+    fields = [
+        str(row["title"] or ""),
+        str(row["chunk_title"] or ""),
+        str(row["chunk_symbols"] or ""),
+        str(row["body"] or ""),
+    ]
+    count = 0
+    for keyword in _dedupe_terms(keywords):
+        folded = keyword.casefold()
+        if any(folded in field.casefold() for field in fields if field):
+            count += 1
+    return count
+
+
+def collect_query_rows(
+    conn: sqlite3.Connection,
+    keywords: list[str],
+    mode: str,
+    section: str | None,
+    top: int,
+    include_nav: bool,
+) -> list[dict[str, Any]]:
+    match_expr, short_tokens = build_match_expr(keywords, mode)
+    if not match_expr and not short_tokens:
+        return []
+
+    rows: list[sqlite3.Row] = []
+    if match_expr:
+        required_short_tokens = short_tokens if mode == "all" else []
+        rows.extend(query_fts(conn, match_expr, section, top, include_nav, required_short_tokens))
+    if short_tokens and (mode == "or" or not match_expr):
+        rows.extend(query_like(conn, short_tokens, mode, section, top, include_nav))
+    return [{"row": row, "matched_terms_count": 0} for row in rows]
+
+
+def collect_fallback_rows(
+    conn: sqlite3.Connection,
+    keywords: list[str],
+    section: str | None,
+    top: int,
+    include_nav: bool,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    expanded_keywords = expand_keywords_for_fallback(keywords)
+    if len(expanded_keywords) <= 1:
+        return [], expanded_keywords
+
+    original_markers = {keyword.strip().casefold() for keyword in keywords if keyword.strip()}
+    expanded_markers = {keyword.casefold() for keyword in expanded_keywords}
+    if expanded_markers == original_markers:
+        return [], expanded_keywords
+
+    merged: dict[str, dict[str, Any]] = {}
+    for keyword in expanded_keywords:
+        row_items = collect_query_rows(conn, [keyword], "or", section, top, include_nav)
+        for item in row_items:
+            row = item["row"]
+            rel_path = str(row["rel_path"])
+            entry = merged.get(rel_path)
+            if entry is None:
+                merged[rel_path] = {
+                    "row": row,
+                    "matched_terms": {keyword.casefold()},
+                }
+                continue
+            entry["matched_terms"].add(keyword.casefold())
+            best_row = entry["row"]
+            if (row["score"], row["rel_path"], row["chunk_idx"]) < (
+                best_row["score"],
+                best_row["rel_path"],
+                best_row["chunk_idx"],
+            ):
+                entry["row"] = row
+
+    ordered = sorted(
+        merged.values(),
+        key=lambda item: (
+            -len(item["matched_terms"]),
+            item["row"]["score"],
+            item["row"]["rel_path"],
+            item["row"]["chunk_idx"],
+        ),
+    )
+    return [
+        {
+            "row": item["row"],
+            "matched_terms_count": len(item["matched_terms"]),
+        }
+        for item in ordered[: top * 3]
+    ], expanded_keywords
 
 
 def list_docsets(hub_root: Path) -> None:
@@ -225,10 +359,10 @@ def query_like(
         where_params.append(section)
 
     sql = f"""
-        SELECT rel_path, title, section, doc_type, source_url, is_nav, chunk_idx, body, chunk_title, -like_score AS score
+        SELECT rel_path, title, section, doc_type, source_url, is_nav, chunk_idx, body, chunk_title, chunk_symbols, -like_score AS score
         FROM (
             SELECT d.rel_path, d.title, d.section, d.doc_type, d.source_url, d.is_nav,
-                   c.chunk_idx, c.body, c.title AS chunk_title,
+                   c.chunk_idx, c.body, c.title AS chunk_title, c.symbols AS chunk_symbols,
                    ({like_score_expr}) AS like_score
             FROM chunks c JOIN documents d ON d.id = c.doc_id
             WHERE {' AND '.join(where)}
@@ -270,7 +404,7 @@ def query_fts(
 
     sql = f"""
         SELECT d.rel_path, d.title, d.section, d.doc_type, d.source_url, d.is_nav,
-               c.chunk_idx, c.body, c.title AS chunk_title,
+               c.chunk_idx, c.body, c.title AS chunk_title, c.symbols AS chunk_symbols,
                {score_expr} AS score
         FROM chunks c JOIN documents d ON d.id = c.doc_id
         WHERE {' AND '.join(where)}
@@ -283,8 +417,6 @@ def query_fts(
 
 def search_one(
     db_path: Path,
-    match_expr: str,
-    short_tokens: list[str],
     keywords: list[str],
     mode: str,
     section: str | None,
@@ -294,19 +426,33 @@ def search_one(
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     try:
-        rows: list[sqlite3.Row] = []
-        if match_expr:
-            required_short_tokens = short_tokens if mode == "all" else []
-            rows.extend(query_fts(conn, match_expr, section, top, include_nav, required_short_tokens))
-        if short_tokens and (mode == "or" or not match_expr):
-            rows.extend(query_like(conn, short_tokens, mode, section, top, include_nav))
+        row_items = collect_query_rows(conn, keywords, mode, section, top, include_nav)
+        highlight_keywords = keywords
+        if not row_items:
+            row_items, expanded_keywords = collect_fallback_rows(conn, keywords, section, top, include_nav)
+            if row_items:
+                highlight_keywords = expanded_keywords
     finally:
         conn.close()
 
+    for item in row_items:
+        item["matched_terms_count"] = max(
+            int(item.get("matched_terms_count", 0)),
+            count_row_keyword_matches(item["row"], highlight_keywords),
+        )
+
     seen: set[str] = set()
     out: list[dict[str, Any]] = []
-    rows.sort(key=lambda r: (r["score"], r["rel_path"], r["chunk_idx"]))
-    for r in rows:
+    row_items.sort(
+        key=lambda item: (
+            -int(item.get("matched_terms_count", 0)),
+            item["row"]["score"],
+            item["row"]["rel_path"],
+            item["row"]["chunk_idx"],
+        )
+    )
+    for item in row_items:
+        r = item["row"]
         if r["rel_path"] in seen:
             continue
         seen.add(r["rel_path"])
@@ -315,6 +461,7 @@ def search_one(
         heading_path = chunk_title
         if chunk_title.startswith((r["title"] or "") + " "):
             heading_path = chunk_title[len((r["title"] or "")) + 1 :]
+        snippet_text, snippet_source = choose_snippet_text(r, highlight_keywords)
         out.append({
             "rel_path": r["rel_path"],
             "title": r["title"],
@@ -324,7 +471,9 @@ def search_one(
             "source_url": r["source_url"],
             "is_nav": bool(r["is_nav"]),
             "score": round(r["score"], 3),
-            "snippet": build_highlighted_snippet(r["body"], keywords, 200),
+            "matched_terms_count": int(item.get("matched_terms_count", 0)),
+            "snippet_source": snippet_source,
+            "snippet": build_highlighted_snippet(snippet_text, highlight_keywords, 200),
         })
         if len(out) >= top:
             break
@@ -355,8 +504,7 @@ def main() -> None:
     if not args.keywords:
         ap.error("需要至少一个关键词")
 
-    match_expr, short_tokens = build_match_expr(args.keywords, args.match)
-    if not match_expr and not short_tokens:
+    if not expand_keywords_for_fallback(args.keywords):
         ap.error("关键词清洗后为空")
 
     cfg = load_docsets(hub_root)
@@ -372,7 +520,7 @@ def main() -> None:
         if db is None:
             continue
         try:
-            rows = search_one(db, match_expr, short_tokens, args.keywords, args.match, args.section, args.top, args.include_nav)
+            rows = search_one(db, args.keywords, args.match, args.section, args.top, args.include_nav)
         except sqlite3.OperationalError as e:
             print(f"[warn] docset={ds['id']} 查询失败: {e}", file=sys.stderr)
             continue
@@ -383,7 +531,7 @@ def main() -> None:
         all_results.extend(rows)
 
     # 跨 docset 合并后按 score 再排，取 top
-    all_results.sort(key=lambda x: x["score"])
+    all_results.sort(key=lambda x: (-int(x.get("matched_terms_count", 0)), x["score"], x["rel_path"]))
     all_results = all_results[: args.top]
 
     if args.json:

@@ -146,16 +146,8 @@ def _is_setext_underline(line: str, char: str) -> bool:
     return all(ch == char for ch in stripped)
 
 
-def _segment_by_markdown_ast(body: str) -> list[tuple[str, str]]:
-    """扫描 ATX / setext 标题生成 (heading_path, segment_text) 列表。
-
-    - 识别 `^\\s{0,3}#{1,6}\\s+title` 形式的 ATX 标题。
-    - 识别 setext 标题：前一行非空文本、下一行由 `=`（H1）或 `-`（H2）组成。
-      这正是 CommonMark 区分 `---` 是 setext 下划线还是 thematic break 的规则。
-    - 跟踪 ``` / ~~~ fenced code block，围栏内的 `#` 与 `---` 都不作为标题。
-    - 与 commonmark 严格语义相比做了简化：未处理 indented code block (4 空格)、HTML 块内标题、
-      block quote 嵌套 setext 等罕见结构；真实 DocsHub 语料里这些模式不影响主路径。
-    """
+def _scan_markdown_headings(body: str) -> list[tuple[int, str, int, int]]:
+    """扫描 Markdown 标题，返回 (level, title, start_line, content_start_line)。"""
     lines = body.splitlines()
     headings: list[tuple[int, str, int, int]] = []
     fence_char: str | None = None
@@ -193,6 +185,27 @@ def _segment_by_markdown_ast(body: str) -> list[tuple[str, str]]:
             level = len(h.group(1))
             title = h.group(2).rstrip(" #").strip()
             headings.append((level, title, i, i + 1))
+    return headings
+
+
+def extract_primary_heading(body: str) -> str:
+    """提取首个 Markdown 标题文本，支持 ATX / setext。"""
+    headings = _scan_markdown_headings(body)
+    return headings[0][1] if headings else ""
+
+
+def _segment_by_markdown_ast(body: str) -> list[tuple[str, str]]:
+    """扫描 ATX / setext 标题生成 (heading_path, segment_text) 列表。
+
+    - 识别 `^\\s{0,3}#{1,6}\\s+title` 形式的 ATX 标题。
+    - 识别 setext 标题：前一行非空文本、下一行由 `=`（H1）或 `-`（H2）组成。
+      这正是 CommonMark 区分 `---` 是 setext 下划线还是 thematic break 的规则。
+    - 跟踪 ``` / ~~~ fenced code block，围栏内的 `#` 与 `---` 都不作为标题。
+    - 与 commonmark 严格语义相比做了简化：未处理 indented code block (4 空格)、HTML 块内标题、
+      block quote 嵌套 setext 等罕见结构；真实 DocsHub 语料里这些模式不影响主路径。
+    """
+    lines = body.splitlines()
+    headings = _scan_markdown_headings(body)
 
     if not headings:
         whole = body.strip()
