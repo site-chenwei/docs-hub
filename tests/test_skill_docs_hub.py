@@ -26,7 +26,7 @@ INIT_SCRIPT = SKILL_ROOT / "scripts" / "local_doc_init.py"
 
 sys.path.insert(0, str(SKILL_ROOT / "scripts"))
 from _common import DependencyMissingError, parse_front_matter  # noqa: E402
-from build_docset_index import compute_build_signature, merge_config  # noqa: E402
+from build_docset_index import compute_build_signature, maybe_vacuum, merge_config  # noqa: E402
 
 
 class DocsHubCommonTest(unittest.TestCase):
@@ -57,6 +57,29 @@ class DocsHubCommonTest(unittest.TestCase):
         with mock.patch("builtins.__import__", side_effect=fake_import):
             with self.assertRaises(DependencyMissingError):
                 parse_front_matter("---\ntitle: missing yaml\n---\ncontent\n")
+
+    def test_maybe_vacuum_reclaims_free_pages(self) -> None:
+        tmpdir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmpdir.cleanup)
+        db_path = Path(tmpdir.name) / "vacuum.sqlite"
+        conn = sqlite3.connect(db_path)
+        try:
+            conn.execute("CREATE TABLE t(id INTEGER PRIMARY KEY, body TEXT)")
+            payload = "x" * 4096
+            conn.executemany("INSERT INTO t(body) VALUES(?)", [(payload,) for _ in range(2048)])
+            conn.commit()
+            conn.execute("DELETE FROM t WHERE id % 2 = 0")
+            conn.commit()
+
+            before = conn.execute("PRAGMA freelist_count").fetchone()[0]
+            self.assertGreaterEqual(before, 1024)
+            stats = maybe_vacuum(conn)
+            after = conn.execute("PRAGMA freelist_count").fetchone()[0]
+        finally:
+            conn.close()
+
+        self.assertTrue(stats["vacuumed"])
+        self.assertLess(after, before)
 
 
 class DocsHubLayoutTest(unittest.TestCase):

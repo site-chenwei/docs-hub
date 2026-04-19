@@ -28,7 +28,12 @@
     {
       "id": "harmonyos",
       "name": "HarmonyOS",
-      "root": "docs/HarmonyOS"
+      "root": "docs/HarmonyOS",
+      "chunk": {
+        "target_chars": 2200,
+        "max_chars": 2800,
+        "overlap_chars": 120
+      }
     },
     {
       "id": "pinduoduo",

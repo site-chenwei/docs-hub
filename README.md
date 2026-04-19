@@ -166,6 +166,8 @@ python3 -m unittest discover -s tests -p 'test_skill_*.py'
 - SQLite FTS5 + trigram 做中文与符号混合检索
 - 查询片段按命中点裁切并高亮，减少无关前文
 - `init` 会清理陈旧依赖，并自动重建与当前 build 逻辑不一致的索引
+- 构建阶段针对大 docset 调整了 chunk 粒度与 SQLite 写入策略，降低首建时间与索引体积
+- 构建完成后会按空页比例压缩 SQLite，避免 SQLite 文件长期虚胖
 - 支持 `--rebuild-stale`、`--docset`、`--section`、`--match all|or`
 
 ## Command Contract

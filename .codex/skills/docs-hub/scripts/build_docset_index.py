@@ -81,8 +81,8 @@ CREATE TABLE IF NOT EXISTS meta (
 
 BUILD_LOGIC_VERSION = "7"
 
-# 本次 build 写入文档数达到或超过此值时跑一次 FTS5 optimize；否则跳过以免小增量时的无谓合并。
-OPTIMIZE_THRESHOLD = 500
+VACUUM_MIN_FREE_PAGES = 1024
+VACUUM_FREE_PAGE_RATIO = 0.2
 
 
 class DocsetBuildError(RuntimeError):
@@ -138,7 +138,6 @@ def merge_config(defaults: dict[str, Any], override: dict[str, Any]) -> dict[str
             out[k] = v
     return out
 
-
 def compute_build_signature(cfg: dict[str, Any]) -> str:
     payload = {
         "build_logic_version": BUILD_LOGIC_VERSION,
@@ -152,8 +151,11 @@ def connect(db_path: Path) -> sqlite3.Connection:
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(db_path)
     conn.executescript(SCHEMA)
-    conn.execute("PRAGMA journal_mode=WAL")
+    # 构建是单进程离线写入，DELETE + 内存临时表比 WAL 更省一次额外写放大。
+    conn.execute("PRAGMA journal_mode=DELETE")
     conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA temp_store=MEMORY")
+    conn.execute("PRAGMA cache_size=-65536")
     return conn
 
 
@@ -172,6 +174,37 @@ def checkpoint_and_close(conn: sqlite3.Connection, db_path: Path) -> None:
                 sidecar.unlink()
         except OSError:
             pass
+
+
+def maybe_vacuum(conn: sqlite3.Connection) -> dict[str, Any]:
+    page_count = int(conn.execute("PRAGMA page_count").fetchone()[0])
+    page_size = int(conn.execute("PRAGMA page_size").fetchone()[0])
+    freelist_count = int(conn.execute("PRAGMA freelist_count").fetchone()[0])
+    free_ratio = (freelist_count / page_count) if page_count else 0.0
+
+    stats = {
+        "vacuumed": False,
+        "page_count": page_count,
+        "freelist_count": freelist_count,
+        "free_mb": round((freelist_count * page_size) / 1024 / 1024, 2),
+        "free_ratio": round(free_ratio, 4),
+    }
+    if freelist_count < VACUUM_MIN_FREE_PAGES or free_ratio < VACUUM_FREE_PAGE_RATIO:
+        return stats
+
+    conn.execute("VACUUM")
+    page_count_after = int(conn.execute("PRAGMA page_count").fetchone()[0])
+    freelist_count_after = int(conn.execute("PRAGMA freelist_count").fetchone()[0])
+    stats.update(
+        {
+            "vacuumed": True,
+            "page_count_after": page_count_after,
+            "freelist_count_after": freelist_count_after,
+            "db_mb_after": round((page_count_after * page_size) / 1024 / 1024, 2),
+            "free_mb_after": round((freelist_count_after * page_size) / 1024 / 1024, 2),
+        }
+    )
+    return stats
 
 
 def meta_value(conn: sqlite3.Connection, key: str) -> str | None:
@@ -389,13 +422,7 @@ def build_docset(hub_root: Path, docset: dict[str, Any], defaults: dict[str, Any
         (BUILD_LOGIC_VERSION,),
     )
     conn.commit()
-    # FTS5 优化：只在全量重建或新增量较大时执行，否则跳过以避免小 delta 的无谓合并开销。
-    if force_reindex or stats["indexed"] >= OPTIMIZE_THRESHOLD:
-        try:
-            conn.execute("INSERT INTO chunks(chunks) VALUES('optimize')")
-            conn.commit()
-        except sqlite3.OperationalError:
-            pass
+    stats["vacuum"] = maybe_vacuum(conn)
     checkpoint_and_close(conn, db_path)
 
     warn.flush()
