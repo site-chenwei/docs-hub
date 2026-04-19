@@ -54,6 +54,7 @@ Use this skill to query an external DocsHub folder. The skill bundle provides th
 - This skill needs a one-time init after installation.
 - Prefer performing init yourself when the user uses `$docs-hub init ...`.
 - During init, if the DocsHub root resolves successfully, let the script detect missing or stale indexes and auto-build them.
+- Init reuses the bundled local dependency cache when the requirements hash and Python version still match; use `--refresh-deps` only when you explicitly need a clean reinstall.
 - Query and rebuild prefer the DocsHub root recorded during the last successful init.
 - Explicit `init <hub-root>` is strict: it validates only that directory and does not fall back to env or workspace discovery.
 - If any bundled script says the skill is not initialized during a normal search, tell the user to run `$docs-hub init` in Codex instead of showing raw shell commands first.

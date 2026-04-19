@@ -17,6 +17,7 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass, field
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -105,6 +106,14 @@ class Chunk:
     idx: int = 0
 
 
+@dataclass(frozen=True)
+class MarkdownAnalysis:
+    headings: tuple[tuple[int, str, int, int], ...]
+    segments: tuple[tuple[str, str], ...]
+    visible_lines: tuple[str, ...]
+    primary_heading: str
+
+
 def _split_by_length(text: str, target: int, max_len: int, overlap: int) -> list[str]:
     """按目标长度切分，优先在换行/句号/空格处断开；块之间保留 overlap 字符重叠。"""
     text = text.strip()
@@ -146,9 +155,8 @@ def _is_setext_underline(line: str, char: str) -> bool:
     return all(ch == char for ch in stripped)
 
 
-def _scan_markdown_headings(body: str) -> list[tuple[int, str, int, int]]:
+def _scan_markdown_headings_from_lines(lines: tuple[str, ...]) -> list[tuple[int, str, int, int]]:
     """扫描 Markdown 标题，返回 (level, title, start_line, content_start_line)。"""
-    lines = body.splitlines()
     headings: list[tuple[int, str, int, int]] = []
     fence_char: str | None = None
     fence_len = 0
@@ -188,14 +196,20 @@ def _scan_markdown_headings(body: str) -> list[tuple[int, str, int, int]]:
     return headings
 
 
+def _scan_markdown_headings(body: str) -> list[tuple[int, str, int, int]]:
+    return list(_analyze_markdown(body).headings)
+
+
 def extract_primary_heading(body: str) -> str:
     """提取首个 Markdown 标题文本，支持 ATX / setext。"""
-    headings = _scan_markdown_headings(body)
-    return headings[0][1] if headings else ""
+    return _analyze_markdown(body).primary_heading
 
 
-def _segment_by_markdown_ast(body: str) -> list[tuple[str, str]]:
-    """扫描 ATX / setext 标题生成 (heading_path, segment_text) 列表。
+def _segment_by_markdown_ast_from_lines(
+    lines: tuple[str, ...],
+    headings: tuple[tuple[int, str, int, int], ...],
+) -> list[tuple[str, str]]:
+    """基于已解析标题生成 (heading_path, segment_text) 列表。
 
     - 识别 `^\\s{0,3}#{1,6}\\s+title` 形式的 ATX 标题。
     - 识别 setext 标题：前一行非空文本、下一行由 `=`（H1）或 `-`（H2）组成。
@@ -204,11 +218,8 @@ def _segment_by_markdown_ast(body: str) -> list[tuple[str, str]]:
     - 与 commonmark 严格语义相比做了简化：未处理 indented code block (4 空格)、HTML 块内标题、
       block quote 嵌套 setext 等罕见结构；真实 DocsHub 语料里这些模式不影响主路径。
     """
-    lines = body.splitlines()
-    headings = _scan_markdown_headings(body)
-
     if not headings:
-        whole = body.strip()
+        whole = "\n".join(lines).strip()
         return [("", whole)] if whole else []
 
     segments: list[tuple[str, str]] = []
@@ -229,6 +240,26 @@ def _segment_by_markdown_ast(body: str) -> list[tuple[str, str]]:
         heading_path = " > ".join(text for _, text in stack if text)
         segments.append((heading_path, seg_text))
     return segments
+
+
+@lru_cache(maxsize=512)
+def _analyze_markdown(body: str) -> MarkdownAnalysis:
+    """对同一份 Markdown 做一次解析，供标题提取、分块和导航页判断复用。"""
+    lines = tuple(body.splitlines())
+    headings = tuple(_scan_markdown_headings_from_lines(lines))
+    segments = tuple(_segment_by_markdown_ast_from_lines(lines, headings))
+    visible_lines = tuple(line for line in lines if line.strip() and not line.strip().startswith("#"))
+    primary_heading = headings[0][1] if headings else ""
+    return MarkdownAnalysis(
+        headings=headings,
+        segments=segments,
+        visible_lines=visible_lines,
+        primary_heading=primary_heading,
+    )
+
+
+def _segment_by_markdown_ast(body: str) -> list[tuple[str, str]]:
+    return list(_analyze_markdown(body).segments)
 
 
 def split_markdown(
@@ -303,7 +334,7 @@ def is_nav_page(rel_path: Path, fm: dict[str, Any], body: str, nav_rules: dict[s
     if rel_path.name in filenames:
         return True
     # 正文去掉标题后，全是链接行（或空行）→ 导航页
-    lines = [l for l in body.splitlines() if l.strip() and not l.strip().startswith("#")]
+    lines = list(_analyze_markdown(body).visible_lines)
     if not lines:
         return True
     if all(_LINK_ONLY_LINE.match(l) for l in lines):

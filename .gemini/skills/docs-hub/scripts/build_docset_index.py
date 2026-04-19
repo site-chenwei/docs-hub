@@ -5,7 +5,9 @@
         documents      — 每篇文档一行（rel_path, title, section, doc_type, source_url, is_nav, sha256, mtime）
         chunks (FTS5)  — 每块一行（title, symbols, body, doc_id, chunk_idx）tokenize=trigram
 
-增量规则：按 rel_path 的 mtime+sha256 判断是否变更；未变更跳过分块/入库。
+增量规则：
+    - 优先按 rel_path 的 mtime_ns + ctime_ns + size 快速跳过明显未变文件
+    - 其余情况回退到 sha256 校验，避免被保留 mtime 的拷贝误判为未变更
 过滤规则：
     - 排除 *:Zone.Identifier、catalog.md、README.md（源自 docsets.json.defaults.exclude）
     - nav 页仍入库但打 is_nav=1，默认 search 时过滤；加 --include-nav 可带出
@@ -24,6 +26,7 @@ import os
 import sqlite3
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -55,6 +58,8 @@ CREATE TABLE IF NOT EXISTS documents (
     source_url TEXT,
     is_nav INTEGER NOT NULL DEFAULT 0,
     mtime REAL,
+    mtime_ns INTEGER,
+    ctime_ns INTEGER,
     size INTEGER,
     sha256 TEXT,
     chunk_count INTEGER NOT NULL DEFAULT 0
@@ -79,7 +84,7 @@ CREATE TABLE IF NOT EXISTS meta (
 );
 """
 
-BUILD_LOGIC_VERSION = "7"
+BUILD_LOGIC_VERSION = "8"
 
 VACUUM_MIN_FREE_PAGES = 1024
 VACUUM_FREE_PAGE_RATIO = 0.2
@@ -87,6 +92,16 @@ VACUUM_FREE_PAGE_RATIO = 0.2
 
 class DocsetBuildError(RuntimeError):
     """docset 构建在预检查阶段无法继续。调用方决定是终止 CLI 还是跳过单个 docset。"""
+
+
+@dataclass(frozen=True)
+class DocumentSnapshot:
+    doc_id: int
+    sha256: str
+    mtime: float
+    mtime_ns: int
+    ctime_ns: int
+    size: int
 
 
 def compile_pathspec(patterns: list[str]):
@@ -138,6 +153,7 @@ def merge_config(defaults: dict[str, Any], override: dict[str, Any]) -> dict[str
             out[k] = v
     return out
 
+
 def compute_build_signature(cfg: dict[str, Any]) -> str:
     payload = {
         "build_logic_version": BUILD_LOGIC_VERSION,
@@ -151,12 +167,23 @@ def connect(db_path: Path) -> sqlite3.Connection:
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(db_path)
     conn.executescript(SCHEMA)
+    ensure_schema_compat(conn)
     # 构建是单进程离线写入，DELETE + 内存临时表比 WAL 更省一次额外写放大。
     conn.execute("PRAGMA journal_mode=DELETE")
     conn.execute("PRAGMA synchronous=NORMAL")
     conn.execute("PRAGMA temp_store=MEMORY")
     conn.execute("PRAGMA cache_size=-65536")
     return conn
+
+
+def ensure_schema_compat(conn: sqlite3.Connection) -> None:
+    existing = {str(row[1]) for row in conn.execute("PRAGMA table_info(documents)")}
+    for column_name, column_type in (
+        ("mtime_ns", "INTEGER"),
+        ("ctime_ns", "INTEGER"),
+    ):
+        if column_name not in existing:
+            conn.execute(f"ALTER TABLE documents ADD COLUMN {column_name} {column_type}")
 
 
 def checkpoint_and_close(conn: sqlite3.Connection, db_path: Path) -> None:
@@ -212,15 +239,22 @@ def meta_value(conn: sqlite3.Connection, key: str) -> str | None:
     return row[0] if row else None
 
 
-def load_document_snapshot(conn: sqlite3.Connection) -> dict[str, tuple[int, str, float]]:
-    """一次性把 documents 表的 (rel_path → id, sha256, mtime) 读入内存，
+def load_document_snapshot(conn: sqlite3.Connection) -> dict[str, DocumentSnapshot]:
+    """一次性把 documents 表的快照读入内存，
     供主循环 O(1) 查询，避免每文件一次 SELECT。
     """
-    snapshot: dict[str, tuple[int, str, float]] = {}
-    for rel_path, doc_id, sha, mtime in conn.execute(
-        "SELECT rel_path, id, sha256, mtime FROM documents"
+    snapshot: dict[str, DocumentSnapshot] = {}
+    for rel_path, doc_id, sha, mtime, mtime_ns, ctime_ns, size in conn.execute(
+        "SELECT rel_path, id, sha256, mtime, mtime_ns, ctime_ns, size FROM documents"
     ):
-        snapshot[rel_path] = (doc_id, sha or "", float(mtime or 0.0))
+        snapshot[rel_path] = DocumentSnapshot(
+            doc_id=int(doc_id),
+            sha256=sha or "",
+            mtime=float(mtime or 0.0),
+            mtime_ns=int(mtime_ns or 0),
+            ctime_ns=int(ctime_ns or 0),
+            size=int(size or 0),
+        )
     return snapshot
 
 
@@ -233,14 +267,16 @@ def upsert_document(
     source_url: str,
     is_nav: bool,
     mtime: float,
+    mtime_ns: int,
+    ctime_ns: int,
     size: int,
     sha: str,
     chunk_count: int,
 ) -> int:
     cur = conn.execute(
         """
-        INSERT INTO documents(rel_path, title, section, doc_type, source_url, is_nav, mtime, size, sha256, chunk_count)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO documents(rel_path, title, section, doc_type, source_url, is_nav, mtime, mtime_ns, ctime_ns, size, sha256, chunk_count)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(rel_path) DO UPDATE SET
             title=excluded.title,
             section=excluded.section,
@@ -248,12 +284,27 @@ def upsert_document(
             source_url=excluded.source_url,
             is_nav=excluded.is_nav,
             mtime=excluded.mtime,
+            mtime_ns=excluded.mtime_ns,
+            ctime_ns=excluded.ctime_ns,
             size=excluded.size,
             sha256=excluded.sha256,
             chunk_count=excluded.chunk_count
         RETURNING id
         """,
-        (rel_path, title, section, doc_type, source_url, int(is_nav), mtime, size, sha, chunk_count),
+        (
+            rel_path,
+            title,
+            section,
+            doc_type,
+            source_url,
+            int(is_nav),
+            mtime,
+            mtime_ns,
+            ctime_ns,
+            size,
+            sha,
+            chunk_count,
+        ),
     )
     return cur.fetchone()[0]
 
@@ -283,7 +334,16 @@ def build_docset(hub_root: Path, docset: dict[str, Any], defaults: dict[str, Any
     build_signature = compute_build_signature(cfg)
     force_reindex = rebuild or meta_value(conn, "build_signature") != build_signature
 
-    stats = {"scanned": 0, "indexed": 0, "skipped_unchanged": 0, "failed": 0, "nav": 0, "warnings": 0}
+    stats = {
+        "scanned": 0,
+        "indexed": 0,
+        "skipped_unchanged": 0,
+        "skipped_fast": 0,
+        "skipped_hash_verified": 0,
+        "failed": 0,
+        "nav": 0,
+        "warnings": 0,
+    }
     t0 = time.time()
 
     # 预加载文档快照，主循环避免 per-file SELECT
@@ -304,6 +364,23 @@ def build_docset(hub_root: Path, docset: dict[str, Any], defaults: dict[str, Any
             stats["failed"] += 1
             continue
 
+        mtime_ns = int(getattr(st, "st_mtime_ns", int(st.st_mtime * 1_000_000_000)))
+        ctime_ns = int(getattr(st, "st_ctime_ns", int(st.st_ctime * 1_000_000_000)))
+
+        prev = snapshot.get(rel)
+        prev_id = prev.doc_id if prev else None
+        # stat 完全一致时可直接跳过；保留 mtime 的覆盖写入仍会更新 ctime，从而落回哈希校验。
+        if (
+            prev
+            and not force_reindex
+            and prev.size == st.st_size
+            and prev.mtime_ns == mtime_ns
+            and prev.ctime_ns == ctime_ns
+        ):
+            stats["skipped_fast"] += 1
+            stats["skipped_unchanged"] += 1
+            continue
+
         text, err = read_text_safely(path)
         if text is None:
             warn.add(rel, "read_error", err or "")
@@ -311,13 +388,18 @@ def build_docset(hub_root: Path, docset: dict[str, Any], defaults: dict[str, Any
             continue
 
         sha = sha256_text(text)
-        prev = snapshot.get(rel)
-        prev_id = prev[0] if prev else None
-        # 只看内容哈希比对。mtime 单独不可信（cp -p / rsync -t / 低精度 FS 下可能保留
-        # 旧 mtime 但内容已变），正确性优先不用它做快捷跳过。
-        if prev and not force_reindex and prev[1] == sha:
-            if prev[2] != st.st_mtime:
-                conn.execute("UPDATE documents SET mtime=? WHERE id=?", (st.st_mtime, prev_id))
+        if prev and not force_reindex and prev.sha256 == sha:
+            if (
+                prev.mtime != st.st_mtime
+                or prev.mtime_ns != mtime_ns
+                or prev.ctime_ns != ctime_ns
+                or prev.size != st.st_size
+            ):
+                conn.execute(
+                    "UPDATE documents SET mtime=?, mtime_ns=?, ctime_ns=?, size=? WHERE id=?",
+                    (st.st_mtime, mtime_ns, ctime_ns, st.st_size, prev_id),
+                )
+            stats["skipped_hash_verified"] += 1
             stats["skipped_unchanged"] += 1
             continue
 
@@ -375,6 +457,8 @@ def build_docset(hub_root: Path, docset: dict[str, Any], defaults: dict[str, Any
             source_url=source_url,
             is_nav=nav,
             mtime=st.st_mtime,
+            mtime_ns=mtime_ns,
+            ctime_ns=ctime_ns,
             size=st.st_size,
             sha=sha,
             chunk_count=len(chunks),

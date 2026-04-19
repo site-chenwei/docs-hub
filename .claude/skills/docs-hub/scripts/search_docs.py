@@ -63,37 +63,31 @@ def build_match_expr(keywords: list[str], mode: str) -> tuple[str, list[str]]:
     return joiner.join(phrases), short_kws
 
 
-def build_like_clause(tokens: list[str], mode: str) -> tuple[str, list[Any], str, list[Any]]:
-    """为短词 fallback 构造 WHERE 条件和加权分数表达式。"""
+def build_short_token_hit_union(
+    tokens: list[str],
+    *,
+    from_clause: str,
+    chunk_rowid_expr: str,
+    weighted_columns: list[tuple[str, float]],
+) -> tuple[str, list[Any]]:
+    """把短词展开成按列分发的 UNION ALL 命中流。
+
+    避免 `title OR symbols OR body` 这种组合 LIKE，把 trigram FTS 的可优化路径尽量保留下来。
+    """
     if not tokens:
-        return "", [], "0.0", []
+        return "", []
 
-    token_clauses: list[str] = []
-    where_params: list[Any] = []
-    score_terms: list[str] = []
-    score_params: list[Any] = []
-    joiner = " AND " if mode == "all" else " OR "
-
-    for token in tokens:
+    selects: list[str] = []
+    params: list[Any] = []
+    for token_ord, token in enumerate(tokens):
         pattern = f"%{token}%"
-        token_clauses.append(
-            "("
-            "COALESCE(c.title, '') LIKE ? OR "
-            "COALESCE(c.symbols, '') LIKE ? OR "
-            "COALESCE(c.body, '') LIKE ?"
-            ")"
-        )
-        where_params.extend([pattern, pattern, pattern])
-        score_terms.append(
-            "("
-            "CASE WHEN COALESCE(c.title, '') LIKE ? THEN 10.0 ELSE 0 END + "
-            "CASE WHEN COALESCE(c.symbols, '') LIKE ? THEN 6.0 ELSE 0 END + "
-            "CASE WHEN COALESCE(c.body, '') LIKE ? THEN 1.0 ELSE 0 END"
-            ")"
-        )
-        score_params.extend([pattern, pattern, pattern])
-
-    return "(" + joiner.join(token_clauses) + ")", where_params, " + ".join(score_terms), score_params
+        for column_expr, weight in weighted_columns:
+            selects.append(
+                f"SELECT {chunk_rowid_expr} AS chunk_rowid, {token_ord} AS token_ord, {weight} AS weight "
+                f"{from_clause} WHERE {column_expr} LIKE ?"
+            )
+            params.append(pattern)
+    return "\nUNION ALL\n".join(selects), params
 
 
 def snippet_clean(s: str, max_len: int = 200) -> str:
@@ -346,31 +340,65 @@ def query_like(
     top: int,
     include_nav: bool,
 ) -> list[sqlite3.Row]:
-    like_clause, like_params, like_score_expr, like_score_params = build_like_clause(short_tokens, mode)
-    if not like_clause:
+    if not short_tokens:
         return []
 
-    where = [like_clause]
-    where_params = list(like_params)
+    ctes: list[str] = []
+    params: list[Any] = []
+    doc_filters: list[str] = []
     if not include_nav:
-        where.append("d.is_nav = 0")
+        doc_filters.append("is_nav = 0")
     if section:
-        where.append("d.section = ?")
-        where_params.append(section)
+        doc_filters.append("section = ?")
+        params.append(section)
+
+    from_clause = "FROM chunks c"
+    if doc_filters:
+        ctes.append(f"eligible_docs AS (SELECT id FROM documents WHERE {' AND '.join(doc_filters)})")
+        from_clause = "FROM chunks c JOIN eligible_docs ed ON ed.id = c.doc_id"
+
+    union_sql, union_params = build_short_token_hit_union(
+        short_tokens,
+        from_clause=from_clause,
+        chunk_rowid_expr="c.rowid",
+        weighted_columns=[
+            ("c.title", 10.0),
+            ("c.symbols", 6.0),
+            ("c.body", 1.0),
+        ],
+    )
+    params.extend(union_params)
+    ctes.append(f"short_hits AS ({union_sql})")
+
+    having_sql = ""
+    if mode == "all":
+        having_sql = "HAVING COUNT(DISTINCT token_ord) = ?"
+        params.append(len(short_tokens))
+    ctes.append(
+        """
+        short_agg AS (
+            SELECT chunk_rowid, SUM(weight) AS like_score, COUNT(DISTINCT token_ord) AS matched_short_tokens
+            FROM short_hits
+            GROUP BY chunk_rowid
+            """
+        + having_sql
+        + """
+        )
+        """
+    )
 
     sql = f"""
-        SELECT rel_path, title, section, doc_type, source_url, is_nav, chunk_idx, body, chunk_title, chunk_symbols, -like_score AS score
-        FROM (
-            SELECT d.rel_path, d.title, d.section, d.doc_type, d.source_url, d.is_nav,
-                   c.chunk_idx, c.body, c.title AS chunk_title, c.symbols AS chunk_symbols,
-                   ({like_score_expr}) AS like_score
-            FROM chunks c JOIN documents d ON d.id = c.doc_id
-            WHERE {' AND '.join(where)}
-        )
-        ORDER BY like_score DESC, rel_path ASC, chunk_idx ASC
+        WITH {', '.join(ctes)}
+        SELECT d.rel_path, d.title, d.section, d.doc_type, d.source_url, d.is_nav,
+               c.chunk_idx, c.body, c.title AS chunk_title, c.symbols AS chunk_symbols,
+               -sa.like_score AS score
+        FROM short_agg sa
+        JOIN chunks c ON c.rowid = sa.chunk_rowid
+        JOIN documents d ON d.id = c.doc_id
+        ORDER BY sa.like_score DESC, d.rel_path ASC, c.chunk_idx ASC
         LIMIT ?
     """
-    params = like_score_params + where_params + [top * 3]
+    params.append(top * 3)
     return conn.execute(sql, params).fetchall()
 
 
@@ -383,35 +411,66 @@ def query_fts(
     required_short_tokens: list[str],
 ) -> list[sqlite3.Row]:
     where = ["chunks MATCH ?"]
-    where_params: list[Any] = [match_expr]
-    score_expr = "bm25(chunks, 10.0, 6.0, 1.0)"
-    score_params: list[Any] = []
-
-    if required_short_tokens:
-        # `match=all` 且混有短词时，短词必须作为过滤条件参与，而不是只做加权。
-        like_clause, like_params, like_score_expr, like_score_params = build_like_clause(required_short_tokens, "all")
-        where.append(like_clause)
-        where_params.extend(like_params)
-        # 短词只提供轻量加权，避免压过 bm25 主排序。
-        score_expr = f"bm25(chunks, 10.0, 6.0, 1.0) - (({like_score_expr}) / 1000.0)"
-        score_params.extend(like_score_params)
-
+    params: list[Any] = [match_expr]
     if not include_nav:
         where.append("d.is_nav = 0")
     if section:
         where.append("d.section = ?")
-        where_params.append(section)
+        params.append(section)
+
+    ctes = [
+        f"""
+        match_rows AS (
+            SELECT c.rowid AS chunk_rowid,
+                   d.rel_path, d.title, d.section, d.doc_type, d.source_url, d.is_nav,
+                   c.chunk_idx, c.body, c.title AS chunk_title, c.symbols AS chunk_symbols,
+                   bm25(chunks, 10.0, 6.0, 1.0) AS bm25_score
+            FROM chunks c JOIN documents d ON d.id = c.doc_id
+            WHERE {' AND '.join(where)}
+        )
+        """
+    ]
+    score_expr = "mr.bm25_score"
+    join_short = ""
+    if required_short_tokens:
+        union_sql, union_params = build_short_token_hit_union(
+            required_short_tokens,
+            from_clause="FROM match_rows mr",
+            chunk_rowid_expr="mr.chunk_rowid",
+            weighted_columns=[
+                ("mr.chunk_title", 10.0),
+                ("mr.chunk_symbols", 6.0),
+                ("mr.body", 1.0),
+            ],
+        )
+        ctes.append(f"short_hits AS ({union_sql})")
+        ctes.append(
+            """
+            short_agg AS (
+                SELECT chunk_rowid, SUM(weight) AS like_score, COUNT(DISTINCT token_ord) AS matched_short_tokens
+                FROM short_hits
+                GROUP BY chunk_rowid
+                HAVING COUNT(DISTINCT token_ord) = ?
+            )
+            """
+        )
+        params.extend(union_params)
+        params.append(len(required_short_tokens))
+        join_short = "JOIN short_agg sa ON sa.chunk_rowid = mr.chunk_rowid"
+        # 短词只提供轻量加权，避免压过 bm25 主排序。
+        score_expr = "mr.bm25_score - (sa.like_score / 1000.0)"
 
     sql = f"""
-        SELECT d.rel_path, d.title, d.section, d.doc_type, d.source_url, d.is_nav,
-               c.chunk_idx, c.body, c.title AS chunk_title, c.symbols AS chunk_symbols,
+        WITH {', '.join(ctes)}
+        SELECT mr.rel_path, mr.title, mr.section, mr.doc_type, mr.source_url, mr.is_nav,
+               mr.chunk_idx, mr.body, mr.chunk_title, mr.chunk_symbols,
                {score_expr} AS score
-        FROM chunks c JOIN documents d ON d.id = c.doc_id
-        WHERE {' AND '.join(where)}
-        ORDER BY score ASC
+        FROM match_rows mr
+        {join_short}
+        ORDER BY score ASC, mr.rel_path ASC, mr.chunk_idx ASC
         LIMIT ?
     """
-    params = score_params + where_params + [top * 3]
+    params.append(top * 3)
     return conn.execute(sql, params).fetchall()
 
 

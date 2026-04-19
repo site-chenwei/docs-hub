@@ -63,4 +63,6 @@ python3 <skill_root>/scripts/build_docset_index.py --hub-root <hub_root> --docse
 - Search results include `abs_path`, which is the path to open for verification.
 - The skill bundle keeps its own `.deps/` and init state; do not write initialization state into the external hub.
 - Running `init` refreshes bundled dependencies in place and rebuilds indexes that are missing or stale for the current build logic.
+- A repeated `init` reuses the local dependency cache when the requirements hash and Python version still match; pass `--refresh-deps` only when you need to force a reinstall.
 - Large docsets may still override `chunk` at the docset level to trade index size/build time against retrieval granularity.
+- Incremental build now prefers a fast stat-based skip (`mtime_ns + ctime_ns + size`) and falls back to sha256 when metadata is not conclusive.

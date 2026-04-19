@@ -410,10 +410,11 @@ class DocsHubSearchSkillTest(unittest.TestCase):
         )
         first = self.run_build(hub_root)
         self.assertIn("'indexed': 1", first.stdout)
-        # 文件未动，二次 build 应当全部走 mtime 跳过路径
+        # 文件未动，二次 build 应当命中 stat 快路径，不再读文件重算哈希。
         second = self.run_build(hub_root)
         self.assertIn("'indexed': 0", second.stdout)
         self.assertIn("'skipped_unchanged': 1", second.stdout)
+        self.assertIn("'skipped_fast': 1", second.stdout)
 
     def test_content_change_with_preserved_mtime_still_reindexes(self) -> None:
         """模拟 cp -p / rsync -t：mtime 被保留但内容变了，必须重建。"""
@@ -458,6 +459,49 @@ class DocsHubSearchSkillTest(unittest.TestCase):
 
         rows = self.run_search(hub_root, "--rebuild-stale", "updatedpreservedsentinel", "--docset", "testset")
         self.assertEqual(["sub/preserved.md"], [row["rel_path"] for row in rows])
+
+    def test_content_change_same_size_with_preserved_mtime_still_reindexes(self) -> None:
+        """即便 size 和 mtime 一样，只要 ctime 变化，仍要落回哈希校验。"""
+        hub_root = self.make_hub()
+        doc_path = self.write_doc(
+            hub_root,
+            "sub/preserved-same-size.md",
+            """
+            ---
+            title: "preserved same size"
+            source_url: "https://example.com/preserved-same-size"
+            menu_path:
+              - "指南"
+            ---
+
+            # preserved same size
+
+            alphaequal1
+            """,
+        )
+        self.run_build(hub_root)
+        original_stat = doc_path.stat()
+        doc_path.write_text(
+            textwrap.dedent(
+                """
+                ---
+                title: "preserved same size"
+                source_url: "https://example.com/preserved-same-size"
+                menu_path:
+                  - "指南"
+                ---
+
+                # preserved same size
+
+                omegaequal1
+                """
+            ).lstrip(),
+            encoding="utf-8",
+        )
+        os.utime(doc_path, (original_stat.st_atime, original_stat.st_mtime))
+
+        rows = self.run_search(hub_root, "--rebuild-stale", "omegaequal1", "--docset", "testset")
+        self.assertEqual(["sub/preserved-same-size.md"], [row["rel_path"] for row in rows])
 
     def test_setext_headings_are_recognized(self) -> None:
         hub_root = self.make_hub()
@@ -962,6 +1006,46 @@ class DocsHubSearchSkillTest(unittest.TestCase):
         )
         self.assertTrue((hub_root / "index" / "testset.sqlite").exists())
 
+    def test_init_failure_does_not_leave_state_file(self) -> None:
+        tmpdir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmpdir.cleanup)
+        isolated_skill_root = Path(tmpdir.name) / "docs-hub"
+        shutil.copytree(SKILL_ROOT, isolated_skill_root)
+        init_state = isolated_skill_root / ".skill-init.json"
+        if init_state.exists():
+            init_state.unlink()
+        hub_root = Path(tmpdir.name) / "hub"
+        (hub_root / "index").mkdir(parents=True, exist_ok=True)
+        (hub_root / "docsets.json").write_text(
+            json.dumps(
+                {
+                    "version": 1,
+                    "defaults": {
+                        "include": ["*.md", "**/*.md"],
+                        "exclude": [],
+                        "section_from": ["menu_path[0]", "rel_path[0]"],
+                        "doc_type_rules": [],
+                        "nav_rules": {"filenames": ["README.md"], "min_body_chars": 300},
+                        "chunk": {"target_chars": 1200, "max_chars": 1500, "overlap_chars": 150},
+                    },
+                    "docsets": [{"id": "broken", "name": "Broken", "root": "docs/missing"}],
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+        proc = subprocess.run(
+            ["python3", str(isolated_skill_root / "scripts" / "local_doc_init.py"), "--skill-root", str(isolated_skill_root), "--hub-root", str(hub_root)],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertNotEqual(0, proc.returncode)
+        self.assertFalse((isolated_skill_root / ".skill-init.json").exists())
+
     def test_init_cleans_stale_site_packages_before_reinstall(self) -> None:
         tmpdir = tempfile.TemporaryDirectory()
         self.addCleanup(tmpdir.cleanup)
@@ -973,13 +1057,47 @@ class DocsHubSearchSkillTest(unittest.TestCase):
 
         hub_root = self.make_hub()
         subprocess.run(
-            ["python3", str(isolated_skill_root / "scripts" / "local_doc_init.py"), "--skill-root", str(isolated_skill_root), "--hub-root", str(hub_root)],
+            [
+                "python3",
+                str(isolated_skill_root / "scripts" / "local_doc_init.py"),
+                "--skill-root",
+                str(isolated_skill_root),
+                "--hub-root",
+                str(hub_root),
+                "--refresh-deps",
+            ],
             check=True,
             capture_output=True,
             text=True,
         )
 
         self.assertFalse(stale_file.exists())
+
+    def test_init_reuses_existing_site_packages_when_still_valid(self) -> None:
+        tmpdir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmpdir.cleanup)
+        isolated_skill_root = Path(tmpdir.name) / "docs-hub"
+        shutil.copytree(SKILL_ROOT, isolated_skill_root)
+        hub_root = self.make_hub()
+
+        subprocess.run(
+            ["python3", str(isolated_skill_root / "scripts" / "local_doc_init.py"), "--skill-root", str(isolated_skill_root), "--hub-root", str(hub_root)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        sentinel = isolated_skill_root / ".deps" / "site-packages" / "cache-sentinel.txt"
+        sentinel.write_text("reuse me\n", encoding="utf-8")
+
+        proc = subprocess.run(
+            ["python3", str(isolated_skill_root / "scripts" / "local_doc_init.py"), "--skill-root", str(isolated_skill_root), "--hub-root", str(hub_root)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertIn("复用已有 skill 依赖", proc.stdout)
+        self.assertTrue(sentinel.exists())
 
     def test_init_rebuilds_stale_indexes(self) -> None:
         tmpdir = tempfile.TemporaryDirectory()
