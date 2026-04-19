@@ -1,11 +1,19 @@
 ---
 name: docs-hub
-description: Query and maintain an external local DocsHub markdown knowledge base. Use whenever the user asks to查本地文档、DocsHub、共享知识库、API/指南/FAQ/最佳实践/错误码/SDK 文档，or whenever you need to look up factual/reference material before answering. Prefer searching the local DocsHub first; only fall back to other lookup methods when the local hub is missing, has no useful result, or the user explicitly needs the latest online state. Also use when the user explicitly invokes $docs-hub for init, refresh, or reinit.
+description: Query and maintain an external local DocsHub markdown knowledge base. This is the default and primary retrieval path whenever you need to查本地文档、DocsHub、共享知识库、API/指南/FAQ/最佳实践/错误码/SDK 文档，or whenever you need documentation, API facts, guides, FAQ entries, best practices, error codes, SDK references, or other factual/reference material before answering. You must query the local DocsHub first and must not fall back to memory, web search, or other lookup methods unless the local hub is missing, cannot be resolved, returns no useful result after reasonable query refinement, or the user explicitly requires the latest online state. Also use when the user explicitly invokes $docs-hub for init, refresh, or reinit.
 ---
 
 # Doc Hub
 
-Use this skill to query an external DocsHub folder. The skill bundle provides the scripts; the actual documentation lives in a separate hub directory.
+Use this skill as the default retrieval gateway for documentation and factual/reference lookups backed by an external DocsHub folder. The skill bundle provides the scripts; the actual documentation lives in a separate hub directory.
+
+## Priority Rule
+
+- For documentation or factual/reference lookup tasks, `$docs-hub` is the required first retrieval step.
+- Do not answer from memory, generic repo search, or online search before attempting `$docs-hub`, unless one of these exceptions applies:
+  - the local DocsHub root is missing, unresolved, or unusable
+  - the local DocsHub returns no useful match after reasonable query refinement
+  - the user explicitly asks for the latest online state or another non-local source
 
 ## Invocation Modes
 
@@ -25,7 +33,8 @@ Use this skill to query an external DocsHub folder. The skill bundle provides th
 - The user wants to refresh or rebuild a local docs index.
 - The user explicitly invokes `$docs-hub`.
 - You need to look up documentation, API facts, guides, FAQ entries, best practices, error codes, SDK references, or other factual material before answering, even if the user did not explicitly say “查本地文档”.
-- Default policy: when a query might be answerable from the local hub, search the local hub first and only then consider other lookup routes.
+- The query might plausibly be answered from the local DocsHub, even if other tools or your own memory could also answer it.
+- Default policy: if the local hub could reasonably contain the answer, search the local hub first and only then consider any other lookup route.
 
 ## Workflow
 
@@ -42,10 +51,10 @@ Use this skill to query an external DocsHub folder. The skill bundle provides th
 3. For `init`, run:
    - `python3 <skill_root>/scripts/local_doc_init.py --skill-root <skill_root> --hub-root <hub_root>`
    Then stop after reporting success/failure.
-4. Otherwise run the bundled search script:
+4. Otherwise, for every documentation or factual/reference query, run the bundled search script first:
    - `python3 <skill_root>/scripts/search_docs.py --hub-root <hub_root> <keywords> --top 8`
 5. Search first, then open the top 1-3 matched files via the returned `abs_path` and answer from evidence.
-6. If the local hub has no useful match, or the user explicitly requires online-latest information, then fall back to other lookup methods.
+6. Only if the local hub has no useful match after reasonable query refinement, or the user explicitly requires online-latest information, then fall back to other lookup methods.
 7. If the user explicitly asks for `refresh`, use `--rebuild-stale`.
 8. If the user explicitly asks for `reinit`, use `build_docset_index.py --rebuild`.
 
@@ -78,7 +87,7 @@ Use this skill to query an external DocsHub folder. The skill bundle provides th
 
 ## Answering rules
 
-- Prefer local evidence over memory.
+- Prefer local evidence over memory, and do not skip the local DocsHub lookup when it could plausibly answer the question.
 - Return the resolved file path and `source_url` when available.
 - If the local snapshot has no answer, or the user explicitly asks for the latest online state, say the local hub may be stale and then consult the official source or another appropriate lookup method.
 
