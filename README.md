@@ -1,12 +1,6 @@
-# Docs Hub Search Skills Repo
+# Docs Hub Content Repo
 
-这个仓库现在同时承担两个角色：
-
-- 仓库根目录是同步用的 DocsHub 内容仓，保存 `docsets.json` 和 `docs/`
-- [skills/docs-hub](skills/docs-hub/) 是主 Skill bundle
-- `.claude/skills/docs-hub`、`.codex/skills/docs-hub`、`.gemini/skills/docs-hub` 是面向不同 Agent 的原生发现镜像
-
-也就是说，这个仓库既能作为你自己的 DocsHub 云同步项目使用，也能直接作为多 Agent 的 Skill 发布源使用。
+这个仓库现在只承担 DocsHub 内容仓角色，用于保存文档快照与 docset 配置，不再内置 Skill bundle、镜像目录、测试或同步工具。
 
 ## 仓库结构
 
@@ -14,171 +8,31 @@
 docs-hub/
 ├── docsets.json
 ├── docs/
-├── .claude/skills/docs-hub/
-├── .codex/skills/docs-hub/
-├── .gemini/skills/docs-hub/
-├── skills/
-│   └── docs-hub/
-│       ├── SKILL.md
-│       ├── agents/openai.yaml
-│       ├── references/
-│       ├── requirements-build.txt
-│       └── scripts/
-├── tools/
-│   └── sync_skill_bundles.py
-└── tests/
+│   └── <docset 内容>
+└── index/         # 本地生成，默认不入库
 ```
 
-`skills/docs-hub` 是主维护入口；如果你修改了 Skill 内容，需要运行一次：
+## 用途
 
-```bash
-python3 tools/sync_skill_bundles.py
-```
+- 作为本地或云端同步的 DocsHub 内容仓
+- 为外部 `docs-hub` Skill 或其他检索工具提供 `docsets.json` 与 Markdown 文档源
+- 在本地按需生成 `index/` 检索索引，但索引文件默认不提交
 
-把变更同步到 `.claude/.codex/.gemini` 三套 agent-native 目录。
+## 最小要求
 
-## 安装方式
-
-发布到 GitHub 后，可以按不同 Agent 选择最稳的安装方式。
-
-Codex：
-
-```bash
-python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo <owner>/<repo> \
-  --path skills/docs-hub
-```
-
-Gemini CLI：
-
-```bash
-gemini skills install <owner>/<repo> --path skills/docs-hub
-```
-
-Claude Code / CC-Switch / skills.sh：
-
-- 直接把仓库加入扫描源即可；仓库里已经提供 `.claude/skills/docs-hub`
-- 同时保留 `skills/docs-hub`，方便走按子路径安装的工具链
-
-安装后如果 Agent 有自己的缓存或进程状态，按对应工具要求重启即可。
-
-## 安装后使用
-
-如果你把当前仓库本身作为 DocsHub 工作目录，可以直接在 Codex 中对这个仓库执行：
-
-```text
-$docs-hub init /path/to/this/repo
-```
-
-或者进入仓库后直接：
-
-```text
-$docs-hub init
-```
-
-不要要求用户手动记 shell 命令。安装后直接在 Codex 中显式调用：
-
-```text
-$docs-hub init /path/to/your/docs-hub
-```
-
-如果当前工作区、本地环境变量已经能定位到 DocsHub，也可以直接：
-
-```text
-$docs-hub init
-```
-
-之后正常查询：
-
-```text
-$docs-hub HarmonyOS 输入法光标跟随在哪篇文档？
-$docs-hub refresh pdd.mall.info.get
-$docs-hub reinit /path/to/your/docs-hub
-```
-
-`$docs-hub init` 底层会调用 skill 自带的初始化脚本，在 skill 自身目录下创建：
-
-- `.deps/site-packages/`
-- `.skill-init.json`
-
-同时会记录这次初始化使用的 DocsHub 根目录，便于排障与状态确认。
-初始化时会原子刷新 skill 自身依赖目录，避免旧版本依赖残留。
-同时还会检测各个 docset 的索引是否缺失或已经过期；缺失或过期都会自动补建/重建。
-如果 `init` 时显式传了路径，就只验证这个目录本身；它不是标准 DocsHub 根目录就直接报错，不会再回退到别的目录。
-
-只有做仓库开发或手动排障时，才需要直接运行 shell 脚本。
-
-如果你是把整个仓库 clone 到项目里使用：
-
-- Claude Code 会优先从 `.claude/skills/docs-hub` 发现 Skill
-- Codex 可使用 `.codex/skills/docs-hub`
-- Gemini 可使用 `.gemini/skills/docs-hub`
-
-## 外部 DocsHub 要求
-
-Skill 安装产物本身不携带文档快照；实际被搜索的是一个 DocsHub 根目录。当前仓库根目录本身就满足这个结构，其他外部 DocsHub 目录也同样适用。最小结构：
+最小可用结构：
 
 ```text
 <hub-root>/
 ├── docsets.json
 ├── docs/
-└── index/         # 可自动生成
+└── index/         # 可按需生成
 ```
 
-Skill 解析 DocsHub 根目录的顺序：
+`docsets.json` 负责声明 docset 列表、默认 include/exclude 规则、section/doc_type 规则和 chunk 配置。
 
-初始化：
+## 说明
 
-1. 显式提供的 `--hub-root` / `$docs-hub init <hub-root>`  
-   这时只验证这个目录本身，不回退其他来源
-2. `CODEX_DOC_HUB`
-3. 当前工作区及其祖先目录中的：
-   - `docsets.json`
-   - `doc-search/docsets.json`
-   - `DocsHub/docsets.json`
-
-查询 / 重建：
-
-1. 显式提供的 `--hub-root`
-2. 最近一次成功 `init` 记录的 DocsHub 根目录
-3. `CODEX_DOC_HUB`
-4. 当前工作区及其祖先目录中的：
-   - `docsets.json`
-   - `doc-search/docsets.json`
-   - `DocsHub/docsets.json`
-
-## 开发验证
-
-```bash
-python3 tools/sync_skill_bundles.py
-python3 tools/sync_skill_bundles.py --check
-python3 skills/docs-hub/scripts/local_doc_init.py --skill-root skills/docs-hub
-python3 -m unittest discover -s tests -p 'test_skill_*.py'
-```
-
-仓库也提供了 `.github/workflows/skill-ci.yml`，会在提交时校验镜像目录和测试结果。
-
-## 当前能力
-
-- `pathspec` 处理 include/exclude 规则
-- `PyYAML` 解析 front matter
-- 纯 Python 状态机扫 ATX 标题 + 代码围栏跳过
-- SQLite FTS5 + trigram 做中文与符号混合检索
-- 查询片段按命中点裁切并高亮，减少无关前文
-- `init` 会清理陈旧依赖，并自动重建与当前 build 逻辑不一致的索引
-- 构建阶段针对大 docset 调整了 chunk 粒度与 SQLite 写入策略，降低首建时间与索引体积
-- 构建完成后会按空页比例压缩 SQLite，避免 SQLite 文件长期虚胖
-- 支持 `--rebuild-stale`、`--docset`、`--section`、`--match all|or`
-
-## Command Contract
-
-对外只保留英文命令：
-
-- `$docs-hub init [hub-root]`
-- `$docs-hub refresh <query>`
-- `$docs-hub reinit [hub-root]`
-- `$docs-hub <query>`
-
-不再约定中文命令别名。
-
-这个仓库可以直接作为 GitHub 来源；按子路径安装时取 `skills/docs-hub` 即可，而 clone 整仓时又能被 Claude/Codex/Gemini 按各自原生目录约定发现。
+- Skill 本体已迁移到独立 Skill 仓，不再随本仓库维护。
+- 若要查询这份内容仓，请使用外部安装的 `docs-hub` Skill，并把本仓库路径作为 `hub-root`。
+- `index/` 下的 SQLite 与 warning 文件属于本地产物，默认忽略。
