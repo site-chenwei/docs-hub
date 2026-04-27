@@ -39,6 +39,11 @@
       "id": "pinduoduo",
       "name": "拼多多开放平台",
       "root": "docs/拼多多"
+    },
+    {
+      "id": "sing-box",
+      "name": "sing-box",
+      "root": "docs/sing-box"
     }
   ]
 }
