@@ -1,7 +1,5 @@
 # 索引产物不入库
-index/*.sqlite
-index/*.sqlite-*
-index/*.warnings.jsonl
+index/
 
 # Python / 本地开发缓存
 __pycache__/

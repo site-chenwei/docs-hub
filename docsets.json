@@ -44,6 +44,30 @@
       "id": "sing-box",
       "name": "sing-box",
       "root": "docs/sing-box"
+    },
+    {
+      "id": "chatbox",
+      "name": "Chatbox",
+      "root": "docs/chatbox",
+      "chunk": {
+        "target_chars": 1800,
+        "max_chars": 2400,
+        "overlap_chars": 120
+      }
+    },
+    {
+      "id": "ai-sdk",
+      "name": "AI SDK v6",
+      "root": "docs/AI-SDK",
+      "description": "Vercel AI SDK v6 官方文档快照，包含指南、Core/UI/RSC、Provider 与 Cookbook 示例。",
+      "topics": ["Vercel AI SDK", "AI SDK v6", "generateText", "streamText", "useChat", "providers", "tools", "agents"],
+      "recommended_queries": ["generateText streamText tools", "useChat UIMessage transport", "provider openai anthropic google", "migration guide 6.0", "MCP tools runtime context"],
+      "source_sets": ["vercel/ai@ai@6.0.191 content/docs", "vercel/ai@ai@6.0.191 content/providers", "vercel/ai@ai@6.0.191 content/cookbook"],
+      "chunk": {
+        "target_chars": 1800,
+        "max_chars": 2400,
+        "overlap_chars": 120
+      }
     }
   ]
 }

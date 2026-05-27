@@ -1,0 +1,33 @@
+---
+title: useChat No Response
+description: Troubleshooting errors related to the Use Chat Failed to Parse Stream error.
+source_url: "https://github.com/vercel/ai/blob/ai%406.0.191/content/docs/09-troubleshooting/10-use-chat-tools-no-response.mdx"
+---
+
+# `useChat` No Response
+
+## Issue
+
+I am using [`useChat`](/docs/reference/ai-sdk-ui/use-chat).
+When I log the incoming messages on the server, I can see the tool call and the tool result, but the model does not respond with anything.
+
+## Solution
+
+To resolve this issue, convert the incoming messages to the `ModelMessage` format using the [`convertToModelMessages`](/docs/reference/ai-sdk-ui/convert-to-model-messages) function.
+
+```tsx highlight="9"
+import { openai } from '@ai-sdk/openai';
+import { convertToModelMessages, streamText } from 'ai';
+__PROVIDER_IMPORT__;
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const result = streamText({
+    model: __MODEL__,
+    messages: await convertToModelMessages(messages),
+  });
+
+  return result.toUIMessageStreamResponse();
+}
+```

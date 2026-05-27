@@ -1,0 +1,26 @@
+---
+title: AI_NoOutputGeneratedError
+description: Learn how to fix AI_NoOutputGeneratedError
+source_url: "https://github.com/vercel/ai/blob/ai%406.0.191/content/docs/07-reference/05-ai-sdk-errors/ai-no-output-generated-error.mdx"
+---
+
+# AI_NoOutputGeneratedError
+
+This error is thrown when no LLM output was generated, e.g. because of errors.
+
+## Properties
+
+- `message`: The error message (optional, defaults to `'No output generated.'`)
+- `cause`: The underlying error that caused no output to be generated (optional)
+
+## Checking for this Error
+
+You can check if an error is an instance of `AI_NoOutputGeneratedError` using:
+
+```typescript
+import { NoOutputGeneratedError } from 'ai';
+
+if (NoOutputGeneratedError.isInstance(error)) {
+  // Handle the error
+}
+```
